@@ -31,20 +31,20 @@
 
 ## Phase 4: Daily Cycle Workflow
 
-- [ ] Create database query helpers for daily cycles
-- [ ] Build morning calibration interface
-- [ ] Implement AI-generated decisive prompts
-- [ ] Create midday action commitment flow
-- [ ] Build evening reflection interface
+- [x] Create database query helpers for daily cycles
+- [x] Build morning calibration interface
+- [x] Implement AI-generated decisive prompts
+- [x] Create midday action commitment flow
+- [x] Build evening reflection interface
 - [ ] Add cause-effect mapping visualization
 
 ## Phase 5: AI Coach Integration
 
-- [ ] Implement Stoic strategist system prompt
-- [ ] Create daily prompt generation tRPC procedure
-- [ ] Build pattern analysis insights procedure
-- [ ] Add evening reflection feedback procedure
-- [ ] Create insights display interface
+- [x] Implement Stoic strategist system prompt
+- [x] Create daily prompt generation tRPC procedure
+- [x] Build pattern analysis insights procedure
+- [x] Add evening reflection feedback procedure
+- [x] Create insights display interface
 
 ## Phase 6: Inner Circle Social Features
 

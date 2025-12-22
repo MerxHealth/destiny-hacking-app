@@ -7,6 +7,8 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Sliders from "./pages/Sliders";
+import DailyCycle from "./pages/DailyCycle";
+import Insights from "./pages/Insights";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -15,8 +17,8 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path={"/dashboard"} component={Dashboard} />
       <Route path={"/sliders"} component={Sliders} />
-      <Route path={"/daily-cycle"} component={NotFound} />
-      <Route path={"/insights"} component={NotFound} />
+      <Route path={"/daily-cycle"} component={DailyCycle} />
+      <Route path={"/insights"} component={Insights} />
       <Route path={"/inner-circle"} component={NotFound} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
