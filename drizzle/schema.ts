@@ -46,6 +46,24 @@ export type InsertUser = typeof users.$inferInsert;
 // ============================================================================
 
 /**
+ * Slider Profiles allow users to save different slider configurations
+ * for different contexts (Work, Relationships, Conflict, Creation, Health).
+ */
+export const sliderProfiles = mysqlTable("slider_profiles", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 100 }).notNull(), // "Work", "Relationships", etc.
+  description: text("description"),
+  isDefault: boolean("isDefault").default(false).notNull(),
+  axisConfiguration: json("axisConfiguration").notNull(), // Array of {axisId, defaultValue}
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SliderProfile = typeof sliderProfiles.$inferSelect;
+export type InsertSliderProfile = typeof sliderProfiles.$inferInsert;
+
+/**
  * Emotional Axes define the bipolar dimensions users can calibrate.
  * Each axis has two opposing poles (e.g., Fear ← → Courage).
  * Users can create custom axes for different life contexts.
@@ -311,6 +329,268 @@ export const groupParticipants = mysqlTable("group_participants", {
 
 export type GroupParticipant = typeof groupParticipants.$inferSelect;
 export type InsertGroupParticipant = typeof groupParticipants.$inferInsert;
+
+// ============================================================================
+// SOWING & REAPING SIMULATOR
+// ============================================================================
+
+/**
+ * Sowing & Reaping Entries track user's intentional "seeds" (actions/commitments)
+ * and AI predictions of likely "harvests" (outcomes), then compare to actual results.
+ */
+export const sowingReapingEntries = mysqlTable("sowing_reaping_entries", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  // The "seed" - user's intentional action/commitment
+  seedDescription: text("seedDescription").notNull(), // "I'm going to wake up at 5am every day for 30 days"
+  seedDate: varchar("seedDate", { length: 10 }).notNull(),
+  
+  // AI prediction of likely outcomes
+  predictedHarvest: text("predictedHarvest").notNull(), // AI-generated prediction
+  predictionConfidence: int("predictionConfidence"), // 0-100
+  
+  // Tracking period
+  harvestDate: varchar("harvestDate", { length: 10 }), // When to check results
+  
+  // Actual outcomes reported by user
+  actualHarvest: text("actualHarvest"),
+  outcomeMatch: mysqlEnum("outcomeMatch", ["better", "as_predicted", "worse", "mixed"]),
+  
+  // Learning data
+  userReflection: text("userReflection"),
+  accuracyRating: int("accuracyRating"), // How accurate was the AI prediction? 1-5
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("sowing_reaping_user_id_idx").on(table.userId),
+  harvestDateIdx: index("sowing_reaping_harvest_date_idx").on(table.harvestDate),
+}));
+
+export type SowingReapingEntry = typeof sowingReapingEntries.$inferSelect;
+export type InsertSowingReapingEntry = typeof sowingReapingEntries.$inferInsert;
+
+// ============================================================================
+// INTERACTIVE BOOK MODULES
+// ============================================================================
+
+/**
+ * Book Modules represent the 14 chapters transformed into interactive learning experiences.
+ */
+export const bookModules = mysqlTable("book_modules", {
+  id: int("id").autoincrement().primaryKey(),
+  moduleNumber: int("moduleNumber").notNull().unique(),
+  
+  // Module content
+  title: varchar("title", { length: 200 }).notNull(),
+  corePrinciple: text("corePrinciple").notNull(),
+  mentalModel: text("mentalModel").notNull(), // Description or diagram data
+  dailyPractice: text("dailyPractice").notNull(),
+  decisionChallenge: json("decisionChallenge").notNull(), // Branching scenario data
+  reflectionPrompt: text("reflectionPrompt").notNull(),
+  
+  // Unlock criteria
+  requiredPreviousModule: int("requiredPreviousModule"),
+  requiredPracticeDays: int("requiredPracticeDays").default(7).notNull(),
+  
+  // Metadata
+  estimatedMinutes: int("estimatedMinutes").default(15).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type BookModule = typeof bookModules.$inferSelect;
+export type InsertBookModule = typeof bookModules.$inferInsert;
+
+/**
+ * Module Progress tracks each user's journey through the 14 modules.
+ */
+export const moduleProgress = mysqlTable("module_progress", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  moduleId: int("moduleId").notNull().references(() => bookModules.id, { onDelete: "cascade" }),
+  
+  // Progress tracking
+  status: mysqlEnum("status", ["locked", "unlocked", "in_progress", "completed"]).default("locked").notNull(),
+  progressPercentage: int("progressPercentage").default(0).notNull(),
+  
+  // Practice tracking
+  practiceDaysCompleted: int("practiceDaysCompleted").default(0).notNull(),
+  lastPracticeDate: varchar("lastPracticeDate", { length: 10 }),
+  
+  // Challenge and reflection
+  challengeCompleted: boolean("challengeCompleted").default(false).notNull(),
+  reflectionEntry: text("reflectionEntry"),
+  
+  // Timestamps
+  unlockedAt: timestamp("unlockedAt"),
+  completedAt: timestamp("completedAt"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("module_progress_user_id_idx").on(table.userId),
+  moduleIdIdx: index("module_progress_module_id_idx").on(table.moduleId),
+  uniqueUserModule: unique("module_progress_unique").on(table.userId, table.moduleId),
+}));
+
+export type ModuleProgress = typeof moduleProgress.$inferSelect;
+export type InsertModuleProgress = typeof moduleProgress.$inferInsert;
+
+// ============================================================================
+// WEEKLY REVIEWS
+// ============================================================================
+
+/**
+ * Weekly Reviews provide pattern recognition summaries and behavioral metrics.
+ */
+export const weeklyReviews = mysqlTable("weekly_reviews", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  // Time period
+  weekStartDate: varchar("weekStartDate", { length: 10 }).notNull(),
+  weekEndDate: varchar("weekEndDate", { length: 10 }).notNull(),
+  
+  // Pattern recognition
+  patternSummary: text("patternSummary"), // AI-generated summary
+  behavioralMetrics: json("behavioralMetrics"), // { "dailyCyclesCompleted": 5, "avgCourageLevel": 72, ... }
+  
+  // Recommendations
+  adjustmentRecommendations: text("adjustmentRecommendations"),
+  
+  // Identity shift tracking
+  identityShiftOld: text("identityShiftOld"), // "I used to be..."
+  identityShiftNew: text("identityShiftNew"), // "Now I'm becoming..."
+  
+  // User interaction
+  isReviewed: boolean("isReviewed").default(false).notNull(),
+  userNotes: text("userNotes"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("weekly_reviews_user_id_idx").on(table.userId),
+  weekStartDateIdx: index("weekly_reviews_week_start_date_idx").on(table.weekStartDate),
+}));
+
+export type WeeklyReview = typeof weeklyReviews.$inferSelect;
+export type InsertWeeklyReview = typeof weeklyReviews.$inferInsert;
+
+// ============================================================================
+// BIAS CLEARING & PRAYER
+// ============================================================================
+
+/**
+ * Bias Checks track daily cognitive bias awareness and fog clearing exercises.
+ */
+export const biasChecks = mysqlTable("bias_checks", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  checkDate: varchar("checkDate", { length: 10 }).notNull(),
+  biasType: varchar("biasType", { length: 100 }), // "confirmation_bias", "sunk_cost_fallacy", etc.
+  
+  // Assessment
+  fogLevel: int("fogLevel"), // 0-100, how clear is thinking?
+  biasTestResults: json("biasTestResults"),
+  
+  // Intervention
+  clearingExercise: text("clearingExercise"),
+  userReflection: text("userReflection"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("bias_checks_user_id_idx").on(table.userId),
+  checkDateIdx: index("bias_checks_check_date_idx").on(table.checkDate),
+}));
+
+export type BiasCheck = typeof biasChecks.$inferSelect;
+export type InsertBiasCheck = typeof biasChecks.$inferInsert;
+
+/**
+ * Prayer Journal implements the Four-Part Prayer Protocol.
+ */
+export const prayerJournal = mysqlTable("prayer_journal", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  prayerDate: varchar("prayerDate", { length: 10 }).notNull(),
+  
+  // Four-Part Prayer Protocol
+  gratitude: text("gratitude"), // Acknowledge what is
+  clarity: text("clarity"), // Ask for wisdom to see clearly
+  strength: text("strength"), // Request power to act
+  alignment: text("alignment"), // Align will with higher purpose
+  
+  // Integration
+  linkedToDailyCycle: int("linkedToDailyCycle").references(() => dailyCycles.id),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("prayer_journal_user_id_idx").on(table.userId),
+  prayerDateIdx: index("prayer_journal_prayer_date_idx").on(table.prayerDate),
+}));
+
+export type PrayerJournalEntry = typeof prayerJournal.$inferSelect;
+export type InsertPrayerJournalEntry = typeof prayerJournal.$inferInsert;
+
+// ============================================================================
+// ENHANCED SOCIAL FEATURES
+// ============================================================================
+
+/**
+ * Accountability Partnerships enable one-on-one pairing for deep work.
+ */
+export const accountabilityPartnerships = mysqlTable("accountability_partnerships", {
+  id: int("id").autoincrement().primaryKey(),
+  userId1: int("userId1").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId2: int("userId2").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  // Partnership details
+  status: mysqlEnum("status", ["pending", "active", "paused", "ended"]).default("pending").notNull(),
+  sharedGoals: text("sharedGoals"),
+  checkInFrequency: varchar("checkInFrequency", { length: 50 }).default("weekly"), // "daily", "weekly", "biweekly"
+  
+  // Tracking
+  lastCheckIn: varchar("lastCheckIn", { length: 10 }),
+  nextCheckIn: varchar("nextCheckIn", { length: 10 }),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userId1Idx: index("accountability_partnerships_user1_idx").on(table.userId1),
+  userId2Idx: index("accountability_partnerships_user2_idx").on(table.userId2),
+  uniquePartnership: unique("accountability_partnerships_unique").on(table.userId1, table.userId2),
+}));
+
+export type AccountabilityPartnership = typeof accountabilityPartnerships.$inferSelect;
+export type InsertAccountabilityPartnership = typeof accountabilityPartnerships.$inferInsert;
+
+/**
+ * Slider Alignment Sessions allow temporary syncing of slider states for shared experiences.
+ */
+export const sliderAlignmentSessions = mysqlTable("slider_alignment_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  creatorId: int("creatorId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  // Alignment details
+  name: varchar("name", { length: 200 }).notNull(), // "Team meeting prep", "Difficult conversation"
+  description: text("description"),
+  targetAlignment: json("targetAlignment").notNull(), // { "courage": 80, "calm": 70 }
+  
+  // Participants (JSON array of user IDs)
+  participants: json("participants").notNull(),
+  
+  // Timing
+  alignmentDate: varchar("alignmentDate", { length: 10 }).notNull(),
+  expiresAt: timestamp("expiresAt"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  creatorIdIdx: index("slider_alignment_creator_id_idx").on(table.creatorId),
+  alignmentDateIdx: index("slider_alignment_date_idx").on(table.alignmentDate),
+}));
+
+export type SliderAlignmentSession = typeof sliderAlignmentSessions.$inferSelect;
+export type InsertSliderAlignmentSession = typeof sliderAlignmentSessions.$inferInsert;
 
 // ============================================================================
 // DRIZZLE RELATIONS (for easier querying)

@@ -658,6 +658,405 @@ Provide a brief Stoic strategist reflection (2-3 sentences) on the cause-effect 
         };
       }),
   }),
+
+  // Slider Profiles & Presets
+  profiles: router({
+    // List all profiles for user
+    list: protectedProcedure.query(async ({ ctx }) => {
+      return db.getUserProfiles(ctx.user.id);
+    }),
+
+    // Create new profile
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1).max(100),
+        description: z.string().optional(),
+        axisConfiguration: z.array(z.object({
+          axisId: z.number(),
+          defaultValue: z.number().min(0).max(100),
+        })),
+        isDefault: z.boolean().default(false),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.createProfile({
+          userId: ctx.user.id,
+          ...input,
+        });
+      }),
+
+    // Load profile (returns axis configuration)
+    load: protectedProcedure
+      .input(z.object({ profileId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return db.getProfileById(input.profileId, ctx.user.id);
+      }),
+
+    // Update profile
+    update: protectedProcedure
+      .input(z.object({
+        profileId: z.number(),
+        name: z.string().optional(),
+        description: z.string().optional(),
+        axisConfiguration: z.array(z.object({
+          axisId: z.number(),
+          defaultValue: z.number().min(0).max(100),
+        })).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { profileId, ...updates } = input;
+        await db.updateProfile(profileId, ctx.user.id, updates);
+        return { success: true };
+      }),
+
+    // Delete profile
+    delete: protectedProcedure
+      .input(z.object({ profileId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteProfile(input.profileId, ctx.user.id);
+        return { success: true };
+      }),
+  }),
+
+  // Sowing & Reaping Simulator
+  sowingReaping: router({
+    // Create new entry with AI prediction
+    create: protectedProcedure
+      .input(z.object({
+        seedDescription: z.string().min(1),
+        seedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        harvestDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Generate AI prediction
+        const prediction = await invokeLLM({
+          messages: [
+            { role: "system", content: "You are a cause-effect analyst. Given a user's intentional action (seed), predict the likely outcomes (harvest) based on universal principles of cause and effect. Be specific, realistic, and grounded in the Law of Sowing and Reaping. Provide a confidence level (0-100)." },
+            { role: "user", content: `Seed: ${input.seedDescription}\n\nWhat harvest is this likely to produce? Consider both short-term and long-term effects.` }
+          ]
+        });
+
+        const content = prediction.choices[0].message.content;
+        const predictedHarvest = typeof content === 'string' ? content : "Unable to generate prediction";
+        const predictionConfidence = 75; // Default confidence
+
+        return db.createSowingReapingEntry({
+          userId: ctx.user.id,
+          seedDescription: input.seedDescription,
+          seedDate: input.seedDate,
+          predictedHarvest,
+          predictionConfidence,
+          harvestDate: input.harvestDate || null,
+        });
+      }),
+
+    // List entries
+    list: protectedProcedure
+      .input(z.object({ limit: z.number().min(1).max(50).default(20) }))
+      .query(async ({ ctx, input }) => {
+        return db.getUserSowingReapingEntries(ctx.user.id, input.limit);
+      }),
+
+    // Record actual harvest
+    recordHarvest: protectedProcedure
+      .input(z.object({
+        entryId: z.number(),
+        actualHarvest: z.string().min(1),
+        outcomeMatch: z.enum(["better", "as_predicted", "worse", "mixed"]),
+        userReflection: z.string().optional(),
+        accuracyRating: z.number().min(1).max(5).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { entryId, ...updates } = input;
+        await db.updateSowingReapingEntry(entryId, ctx.user.id, updates);
+        return { success: true };
+      }),
+  }),
+
+  // Book Modules
+  modules: router({
+    // List all modules with user progress
+    list: protectedProcedure.query(async ({ ctx }) => {
+      return db.getModulesWithProgress(ctx.user.id);
+    }),
+
+    // Get module details
+    getById: protectedProcedure
+      .input(z.object({ moduleId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const module = await db.getModuleById(input.moduleId);
+        const progress = await db.getModuleProgress(ctx.user.id, input.moduleId);
+        return { module, progress };
+      }),
+
+    // Start module (unlock if criteria met)
+    start: protectedProcedure
+      .input(z.object({ moduleId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        // Check unlock criteria
+        const module = await db.getModuleById(input.moduleId);
+        if (!module) throw new Error("Module not found");
+
+        if (module.requiredPreviousModule) {
+          const prevProgress = await db.getModuleProgress(ctx.user.id, module.requiredPreviousModule);
+          if (!prevProgress || prevProgress.status !== "completed") {
+            throw new Error("Previous module not completed");
+          }
+
+          // Check practice days
+          if (prevProgress.practiceDaysCompleted < module.requiredPracticeDays) {
+            throw new Error(`Complete ${module.requiredPracticeDays} practice days first`);
+          }
+        }
+
+        return db.startModule(ctx.user.id, input.moduleId);
+      }),
+
+    // Record practice day
+    recordPractice: protectedProcedure
+      .input(z.object({ moduleId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.recordModulePractice(ctx.user.id, input.moduleId);
+        return { success: true };
+      }),
+
+    // Complete challenge
+    completeChallenge: protectedProcedure
+      .input(z.object({ moduleId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.completeModuleChallenge(ctx.user.id, input.moduleId);
+        return { success: true };
+      }),
+
+    // Save reflection
+    saveReflection: protectedProcedure
+      .input(z.object({
+        moduleId: z.number(),
+        reflection: z.string().min(1),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await db.saveModuleReflection(ctx.user.id, input.moduleId, input.reflection);
+        return { success: true };
+      }),
+
+    // Complete module
+    complete: protectedProcedure
+      .input(z.object({ moduleId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.completeModule(ctx.user.id, input.moduleId);
+        return { success: true };
+      }),
+  }),
+
+  // Weekly Reviews
+  weeklyReviews: router({
+    // Generate weekly review
+    generate: protectedProcedure
+      .input(z.object({
+        weekStartDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        weekEndDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Get data for the week
+        const cycles = await db.getCyclesInDateRange(ctx.user.id, input.weekStartDate, input.weekEndDate);
+        const states = await db.getStatesInDateRange(ctx.user.id, input.weekStartDate, input.weekEndDate);
+
+        // Calculate metrics
+        const completedCycles = cycles.filter(c => c.isComplete).length;
+        const avgCourage = states.filter(s => s.axisId === 2).reduce((sum, s) => sum + s.value, 0) / (states.filter(s => s.axisId === 2).length || 1);
+
+        const behavioralMetrics = {
+          dailyCyclesCompleted: completedCycles,
+          totalDays: 7,
+          avgCourageLevel: Math.round(avgCourage),
+          totalCalibrations: states.length,
+        };
+
+        // Generate AI pattern summary
+        const patternPrompt = `Analyze this week's data:\n- Daily cycles completed: ${completedCycles}/7\n- Average courage level: ${Math.round(avgCourage)}\n- Total calibrations: ${states.length}\n\nProvide a brief pattern recognition summary and one adjustment recommendation for next week.`;
+
+        const aiResponse = await invokeLLM({
+          messages: [
+            { role: "system", content: STOIC_STRATEGIST_PROMPT },
+            { role: "user", content: patternPrompt }
+          ]
+        });
+
+        const aiContent = aiResponse.choices[0].message.content;
+        const patternSummary = typeof aiContent === 'string' ? aiContent : "No patterns detected";
+
+        return db.createWeeklyReview({
+          userId: ctx.user.id,
+          weekStartDate: input.weekStartDate,
+          weekEndDate: input.weekEndDate,
+          patternSummary,
+          behavioralMetrics,
+          adjustmentRecommendations: null,
+          identityShiftOld: null,
+          identityShiftNew: null,
+        });
+      }),
+
+    // List reviews
+    list: protectedProcedure
+      .input(z.object({ limit: z.number().min(1).max(20).default(10) }))
+      .query(async ({ ctx, input }) => {
+        return db.getUserWeeklyReviews(ctx.user.id, input.limit);
+      }),
+
+    // Update identity shift
+    updateIdentityShift: protectedProcedure
+      .input(z.object({
+        reviewId: z.number(),
+        identityShiftOld: z.string(),
+        identityShiftNew: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { reviewId, ...updates } = input;
+        await db.updateWeeklyReview(reviewId, ctx.user.id, updates);
+        return { success: true };
+      }),
+  }),
+
+  // Bias Clearing
+  biasClearing: router({
+    // Create bias check
+    create: protectedProcedure
+      .input(z.object({
+        checkDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        biasType: z.string().optional(),
+        fogLevel: z.number().min(0).max(100).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.createBiasCheck({
+          userId: ctx.user.id,
+          ...input,
+        });
+      }),
+
+    // Get daily bias prompt
+    getDailyPrompt: protectedProcedure.query(async () => {
+      const biasTypes = [
+        "Confirmation Bias: Are you only seeing evidence that supports what you already believe?",
+        "Sunk Cost Fallacy: Are you continuing something just because you've invested in it?",
+        "Availability Heuristic: Are you overweighting recent or vivid information?",
+        "Anchoring: Are you stuck on the first piece of information you received?",
+        "Dunning-Kruger: Are you overestimating your competence in this area?",
+      ];
+      return biasTypes[Math.floor(Math.random() * biasTypes.length)];
+    }),
+
+    // Save fog check results
+    saveFogCheck: protectedProcedure
+      .input(z.object({
+        checkId: z.number(),
+        fogLevel: z.number().min(0).max(100),
+        clearingExercise: z.string().optional(),
+        userReflection: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { checkId, ...updates } = input;
+        await db.updateBiasCheck(checkId, ctx.user.id, updates);
+        return { success: true };
+      }),
+  }),
+
+  // Prayer Journal
+  prayer: router({
+    // Create prayer entry
+    create: protectedProcedure
+      .input(z.object({
+        prayerDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        gratitude: z.string().optional(),
+        clarity: z.string().optional(),
+        strength: z.string().optional(),
+        alignment: z.string().optional(),
+        linkedToDailyCycle: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.createPrayerEntry({
+          userId: ctx.user.id,
+          ...input,
+        });
+      }),
+
+    // List prayer entries
+    list: protectedProcedure
+      .input(z.object({ limit: z.number().min(1).max(30).default(10) }))
+      .query(async ({ ctx, input }) => {
+        return db.getUserPrayerEntries(ctx.user.id, input.limit);
+      }),
+
+    // Get today's prayer
+    getToday: protectedProcedure.query(async ({ ctx }) => {
+        const today = new Date().toISOString().split('T')[0];
+        return db.getPrayerByDate(ctx.user.id, today);
+      }),
+  }),
+
+  // Accountability Partners
+  accountability: router({
+    // Create partnership
+    create: protectedProcedure
+      .input(z.object({
+        partnerId: z.number(),
+        sharedGoals: z.string().optional(),
+        checkInFrequency: z.enum(["daily", "weekly", "biweekly"]).default("weekly"),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.createAccountabilityPartnership({
+          userId1: ctx.user.id,
+          userId2: input.partnerId,
+          sharedGoals: input.sharedGoals || null,
+          checkInFrequency: input.checkInFrequency,
+          status: "pending",
+        });
+      }),
+
+    // List partnerships
+    list: protectedProcedure.query(async ({ ctx }) => {
+      return db.getUserAccountabilityPartnerships(ctx.user.id);
+    }),
+
+    // Record check-in
+    recordCheckIn: protectedProcedure
+      .input(z.object({ partnershipId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const today = new Date().toISOString().split('T')[0];
+        await db.recordPartnershipCheckIn(input.partnershipId, ctx.user.id, today);
+        return { success: true };
+      }),
+  }),
+
+  // Slider Alignment
+  alignment: router({
+    // Create alignment session
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1).max(200),
+        description: z.string().optional(),
+        targetAlignment: z.record(z.string(), z.number()), // { "courage": 80, "calm": 70 }
+        participants: z.array(z.number()),
+        alignmentDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.createSliderAlignmentSession({
+          creatorId: ctx.user.id,
+          ...input,
+        });
+      }),
+
+    // List alignment sessions
+    list: protectedProcedure.query(async ({ ctx }) => {
+      return db.getUserAlignmentSessions(ctx.user.id);
+    }),
+
+    // Get session details
+    getById: protectedProcedure
+      .input(z.object({ sessionId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return db.getAlignmentSessionById(input.sessionId, ctx.user.id);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

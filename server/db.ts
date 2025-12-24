@@ -1,5 +1,6 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
+import { eq, and, desc, sql, gte, or, lte } from "drizzle-orm";
 import { ENV } from "./_core/env";
 
 // Create database connection
@@ -28,7 +29,6 @@ import {
   type GroupParticipant,
   type InsertGroupParticipant,
 } from "../drizzle/schema";
-import { eq, and, desc, gte, sql } from "drizzle-orm";
 
 // ============================================================================
 // EMOTIONAL AXES
@@ -588,4 +588,582 @@ export async function updateUserPushSubscription(
       updatedAt: new Date(),
     })
     .where(eq(users.id, userId));
+}
+
+// ============================================================================
+// SLIDER PROFILES
+// ============================================================================
+
+import { 
+  sliderProfiles, 
+  type SliderProfile, 
+  type InsertSliderProfile,
+  sowingReapingEntries,
+  type SowingReapingEntry,
+  type InsertSowingReapingEntry,
+  bookModules,
+  moduleProgress,
+  type BookModule,
+  type ModuleProgress,
+  type InsertModuleProgress,
+  weeklyReviews,
+  type WeeklyReview,
+  type InsertWeeklyReview,
+  biasChecks,
+  type BiasCheck,
+  type InsertBiasCheck,
+  prayerJournal,
+  type PrayerJournalEntry,
+  type InsertPrayerJournalEntry,
+  accountabilityPartnerships,
+  type AccountabilityPartnership,
+  type InsertAccountabilityPartnership,
+  sliderAlignmentSessions,
+  type SliderAlignmentSession,
+  type InsertSliderAlignmentSession,
+} from "../drizzle/schema";
+
+/**
+ * Get all profiles for a user
+ */
+export async function getUserProfiles(userId: number): Promise<SliderProfile[]> {
+  return db
+    .select()
+    .from(sliderProfiles)
+    .where(eq(sliderProfiles.userId, userId))
+    .orderBy(desc(sliderProfiles.createdAt));
+}
+
+/**
+ * Create a new profile
+ */
+export async function createProfile(data: InsertSliderProfile): Promise<SliderProfile> {
+  const result = await db.insert(sliderProfiles).values(data);
+  const insertedId = Number(result[0].insertId);
+  
+  const profile = await db
+    .select()
+    .from(sliderProfiles)
+    .where(eq(sliderProfiles.id, insertedId))
+    .limit(1);
+  
+  return profile[0];
+}
+
+/**
+ * Get profile by ID
+ */
+export async function getProfileById(profileId: number, userId: number): Promise<SliderProfile | null> {
+  const results = await db
+    .select()
+    .from(sliderProfiles)
+    .where(and(
+      eq(sliderProfiles.id, profileId),
+      eq(sliderProfiles.userId, userId)
+    ))
+    .limit(1);
+  
+  return results[0] || null;
+}
+
+/**
+ * Update a profile
+ */
+export async function updateProfile(
+  profileId: number,
+  userId: number,
+  data: Partial<SliderProfile>
+): Promise<void> {
+  await db
+    .update(sliderProfiles)
+    .set(data)
+    .where(and(
+      eq(sliderProfiles.id, profileId),
+      eq(sliderProfiles.userId, userId)
+    ));
+}
+
+/**
+ * Delete a profile
+ */
+export async function deleteProfile(profileId: number, userId: number): Promise<void> {
+  await db
+    .delete(sliderProfiles)
+    .where(and(
+      eq(sliderProfiles.id, profileId),
+      eq(sliderProfiles.userId, userId)
+    ));
+}
+
+// ============================================================================
+// SOWING & REAPING
+// ============================================================================
+
+/**
+ * Create a new sowing & reaping entry
+ */
+export async function createSowingReapingEntry(data: InsertSowingReapingEntry): Promise<SowingReapingEntry> {
+  const result = await db.insert(sowingReapingEntries).values(data);
+  const insertedId = Number(result[0].insertId);
+  
+  const entry = await db
+    .select()
+    .from(sowingReapingEntries)
+    .where(eq(sowingReapingEntries.id, insertedId))
+    .limit(1);
+  
+  return entry[0];
+}
+
+/**
+ * Get user's sowing & reaping entries
+ */
+export async function getUserSowingReapingEntries(
+  userId: number,
+  limit: number = 20
+): Promise<SowingReapingEntry[]> {
+  return db
+    .select()
+    .from(sowingReapingEntries)
+    .where(eq(sowingReapingEntries.userId, userId))
+    .orderBy(desc(sowingReapingEntries.seedDate))
+    .limit(limit);
+}
+
+/**
+ * Update sowing & reaping entry (record harvest)
+ */
+export async function updateSowingReapingEntry(
+  entryId: number,
+  userId: number,
+  data: Partial<SowingReapingEntry>
+): Promise<void> {
+  await db
+    .update(sowingReapingEntries)
+    .set(data)
+    .where(and(
+      eq(sowingReapingEntries.id, entryId),
+      eq(sowingReapingEntries.userId, userId)
+    ));
+}
+
+// ============================================================================
+// BOOK MODULES
+// ============================================================================
+
+/**
+ * Get all modules with user progress
+ */
+export async function getModulesWithProgress(userId: number) {
+  const modules = await db.select().from(bookModules).orderBy(bookModules.moduleNumber);
+  const progress = await db
+    .select()
+    .from(moduleProgress)
+    .where(eq(moduleProgress.userId, userId));
+  
+  return modules.map(module => {
+    const userProgress = progress.find(p => p.moduleId === module.id);
+    return {
+      ...module,
+      progress: userProgress || null,
+    };
+  });
+}
+
+/**
+ * Get module by ID
+ */
+export async function getModuleById(moduleId: number): Promise<BookModule | null> {
+  const results = await db
+    .select()
+    .from(bookModules)
+    .where(eq(bookModules.id, moduleId))
+    .limit(1);
+  
+  return results[0] || null;
+}
+
+/**
+ * Get module progress for user
+ */
+export async function getModuleProgress(
+  userId: number,
+  moduleId: number
+): Promise<ModuleProgress | null> {
+  const results = await db
+    .select()
+    .from(moduleProgress)
+    .where(and(
+      eq(moduleProgress.userId, userId),
+      eq(moduleProgress.moduleId, moduleId)
+    ))
+    .limit(1);
+  
+  return results[0] || null;
+}
+
+/**
+ * Start a module (create progress entry)
+ */
+export async function startModule(userId: number, moduleId: number): Promise<ModuleProgress> {
+  const result = await db.insert(moduleProgress).values({
+    userId,
+    moduleId,
+    status: "unlocked",
+    progressPercentage: 0,
+    practiceDaysCompleted: 0,
+    challengeCompleted: false,
+    unlockedAt: new Date(),
+  });
+  
+  const insertedId = Number(result[0].insertId);
+  
+  const progress = await db
+    .select()
+    .from(moduleProgress)
+    .where(eq(moduleProgress.id, insertedId))
+    .limit(1);
+  
+  return progress[0];
+}
+
+/**
+ * Record module practice day
+ */
+export async function recordModulePractice(userId: number, moduleId: number): Promise<void> {
+  const today = new Date().toISOString().split('T')[0];
+  
+  await db
+    .update(moduleProgress)
+    .set({
+      practiceDaysCompleted: sql`${moduleProgress.practiceDaysCompleted} + 1`,
+      lastPracticeDate: today,
+      updatedAt: new Date(),
+    })
+    .where(and(
+      eq(moduleProgress.userId, userId),
+      eq(moduleProgress.moduleId, moduleId)
+    ));
+}
+
+/**
+ * Complete module challenge
+ */
+export async function completeModuleChallenge(userId: number, moduleId: number): Promise<void> {
+  await db
+    .update(moduleProgress)
+    .set({
+      challengeCompleted: true,
+      progressPercentage: 75,
+      updatedAt: new Date(),
+    })
+    .where(and(
+      eq(moduleProgress.userId, userId),
+      eq(moduleProgress.moduleId, moduleId)
+    ));
+}
+
+/**
+ * Save module reflection
+ */
+export async function saveModuleReflection(
+  userId: number,
+  moduleId: number,
+  reflection: string
+): Promise<void> {
+  await db
+    .update(moduleProgress)
+    .set({
+      reflectionEntry: reflection,
+      progressPercentage: 90,
+      updatedAt: new Date(),
+    })
+    .where(and(
+      eq(moduleProgress.userId, userId),
+      eq(moduleProgress.moduleId, moduleId)
+    ));
+}
+
+/**
+ * Complete module
+ */
+export async function completeModule(userId: number, moduleId: number): Promise<void> {
+  await db
+    .update(moduleProgress)
+    .set({
+      status: "completed",
+      progressPercentage: 100,
+      completedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(and(
+      eq(moduleProgress.userId, userId),
+      eq(moduleProgress.moduleId, moduleId)
+    ));
+}
+
+// ============================================================================
+// WEEKLY REVIEWS
+// ============================================================================
+
+/**
+ * Create weekly review
+ */
+export async function createWeeklyReview(data: InsertWeeklyReview): Promise<WeeklyReview> {
+  const result = await db.insert(weeklyReviews).values(data);
+  const insertedId = Number(result[0].insertId);
+  
+  const review = await db
+    .select()
+    .from(weeklyReviews)
+    .where(eq(weeklyReviews.id, insertedId))
+    .limit(1);
+  
+  return review[0];
+}
+
+/**
+ * Get user's weekly reviews
+ */
+export async function getUserWeeklyReviews(userId: number, limit: number = 10): Promise<WeeklyReview[]> {
+  return db
+    .select()
+    .from(weeklyReviews)
+    .where(eq(weeklyReviews.userId, userId))
+    .orderBy(desc(weeklyReviews.weekStartDate))
+    .limit(limit);
+}
+
+/**
+ * Update weekly review
+ */
+export async function updateWeeklyReview(
+  reviewId: number,
+  userId: number,
+  data: Partial<WeeklyReview>
+): Promise<void> {
+  await db
+    .update(weeklyReviews)
+    .set(data)
+    .where(and(
+      eq(weeklyReviews.id, reviewId),
+      eq(weeklyReviews.userId, userId)
+    ));
+}
+
+/**
+ * Get slider states within a date range
+ */
+export async function getStatesInDateRange(
+  userId: number,
+  startDate: string,
+  endDate: string
+): Promise<SliderState[]> {
+  return db
+    .select()
+    .from(sliderStates)
+    .where(and(
+      eq(sliderStates.userId, userId),
+      sql`DATE(${sliderStates.clientTimestamp}) >= ${startDate}`,
+      sql`DATE(${sliderStates.clientTimestamp}) <= ${endDate}`
+    ))
+    .orderBy(sliderStates.clientTimestamp);
+}
+
+// ============================================================================
+// BIAS CLEARING
+// ============================================================================
+
+/**
+ * Create bias check
+ */
+export async function createBiasCheck(data: InsertBiasCheck): Promise<BiasCheck> {
+  const result = await db.insert(biasChecks).values(data);
+  const insertedId = Number(result[0].insertId);
+  
+  const check = await db
+    .select()
+    .from(biasChecks)
+    .where(eq(biasChecks.id, insertedId))
+    .limit(1);
+  
+  return check[0];
+}
+
+/**
+ * Update bias check
+ */
+export async function updateBiasCheck(
+  checkId: number,
+  userId: number,
+  data: Partial<BiasCheck>
+): Promise<void> {
+  await db
+    .update(biasChecks)
+    .set(data)
+    .where(and(
+      eq(biasChecks.id, checkId),
+      eq(biasChecks.userId, userId)
+    ));
+}
+
+// ============================================================================
+// PRAYER JOURNAL
+// ============================================================================
+
+/**
+ * Create prayer entry
+ */
+export async function createPrayerEntry(data: InsertPrayerJournalEntry): Promise<PrayerJournalEntry> {
+  const result = await db.insert(prayerJournal).values(data);
+  const insertedId = Number(result[0].insertId);
+  
+  const entry = await db
+    .select()
+    .from(prayerJournal)
+    .where(eq(prayerJournal.id, insertedId))
+    .limit(1);
+  
+  return entry[0];
+}
+
+/**
+ * Get user's prayer entries
+ */
+export async function getUserPrayerEntries(userId: number, limit: number = 10): Promise<PrayerJournalEntry[]> {
+  return db
+    .select()
+    .from(prayerJournal)
+    .where(eq(prayerJournal.userId, userId))
+    .orderBy(desc(prayerJournal.prayerDate))
+    .limit(limit);
+}
+
+/**
+ * Get prayer entry by date
+ */
+export async function getPrayerByDate(userId: number, date: string): Promise<PrayerJournalEntry | null> {
+  const results = await db
+    .select()
+    .from(prayerJournal)
+    .where(and(
+      eq(prayerJournal.userId, userId),
+      eq(prayerJournal.prayerDate, date)
+    ))
+    .limit(1);
+  
+  return results[0] || null;
+}
+
+// ============================================================================
+// ACCOUNTABILITY PARTNERSHIPS
+// ============================================================================
+
+/**
+ * Create accountability partnership
+ */
+export async function createAccountabilityPartnership(
+  data: InsertAccountabilityPartnership
+): Promise<AccountabilityPartnership> {
+  const result = await db.insert(accountabilityPartnerships).values(data);
+  const insertedId = Number(result[0].insertId);
+  
+  const partnership = await db
+    .select()
+    .from(accountabilityPartnerships)
+    .where(eq(accountabilityPartnerships.id, insertedId))
+    .limit(1);
+  
+  return partnership[0];
+}
+
+/**
+ * Get user's accountability partnerships
+ */
+export async function getUserAccountabilityPartnerships(
+  userId: number
+): Promise<AccountabilityPartnership[]> {
+  return db
+    .select()
+    .from(accountabilityPartnerships)
+    .where(or(
+      eq(accountabilityPartnerships.userId1, userId),
+      eq(accountabilityPartnerships.userId2, userId)
+    ))
+    .orderBy(desc(accountabilityPartnerships.createdAt));
+}
+
+/**
+ * Record partnership check-in
+ */
+export async function recordPartnershipCheckIn(
+  partnershipId: number,
+  userId: number,
+  date: string
+): Promise<void> {
+  await db
+    .update(accountabilityPartnerships)
+    .set({
+      lastCheckIn: date,
+      updatedAt: new Date(),
+    })
+    .where(and(
+      eq(accountabilityPartnerships.id, partnershipId),
+      or(
+        eq(accountabilityPartnerships.userId1, userId),
+        eq(accountabilityPartnerships.userId2, userId)
+      )
+    ));
+}
+
+// ============================================================================
+// SLIDER ALIGNMENT
+// ============================================================================
+
+/**
+ * Create slider alignment session
+ */
+export async function createSliderAlignmentSession(
+  data: InsertSliderAlignmentSession
+): Promise<SliderAlignmentSession> {
+  const result = await db.insert(sliderAlignmentSessions).values(data);
+  const insertedId = Number(result[0].insertId);
+  
+  const session = await db
+    .select()
+    .from(sliderAlignmentSessions)
+    .where(eq(sliderAlignmentSessions.id, insertedId))
+    .limit(1);
+  
+  return session[0];
+}
+
+/**
+ * Get user's alignment sessions
+ */
+export async function getUserAlignmentSessions(userId: number): Promise<SliderAlignmentSession[]> {
+  return db
+    .select()
+    .from(sliderAlignmentSessions)
+    .where(eq(sliderAlignmentSessions.creatorId, userId))
+    .orderBy(desc(sliderAlignmentSessions.alignmentDate));
+}
+
+/**
+ * Get alignment session by ID
+ */
+export async function getAlignmentSessionById(
+  sessionId: number,
+  userId: number
+): Promise<SliderAlignmentSession | null> {
+  const results = await db
+    .select()
+    .from(sliderAlignmentSessions)
+    .where(and(
+      eq(sliderAlignmentSessions.id, sessionId),
+      eq(sliderAlignmentSessions.creatorId, userId)
+    ))
+    .limit(1);
+  
+  return results[0] || null;
 }
