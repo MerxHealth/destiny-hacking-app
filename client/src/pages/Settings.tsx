@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Bell, Clock, Save, Download, FileJson, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import { downloadCSV, downloadJSON, convertToCSV, formatCompleteDataForExport, formatSliderHistoryForExport } from "@/lib/export";
+import { requestNotificationPermission, areNotificationsEnabled, scheduleDailyReminder, sendLocalNotification } from "@/lib/pushNotifications";
 
 export default function Settings() {
   const { user, isLoading: authLoading } = useAuth();
@@ -55,7 +56,13 @@ export default function Settings() {
     },
   });
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    // Schedule push notification if enabled
+    if (enabled && areNotificationsEnabled()) {
+      const [hour, minute] = reminderTime.split(':').map(Number);
+      await scheduleDailyReminder(hour, minute);
+    }
+    
     updateSettingsMutation.mutate({
       enabled,
       reminderTime,
@@ -63,19 +70,20 @@ export default function Settings() {
   };
 
   const handleRequestPermission = async () => {
-    if (!("Notification" in window)) {
-      toast.error("This browser doesn't support notifications");
-      return;
-    }
-
-    const permission = await Notification.requestPermission();
+    const result = await requestNotificationPermission();
     
-    if (permission === "granted") {
+    if (result.granted) {
       toast.success("Notification permission granted");
       setEnabled(true);
       setHasChanges(true);
-    } else if (permission === "denied") {
-      toast.error("Notification permission denied");
+      
+      // Send a test notification
+      sendLocalNotification("Destiny Hacking", {
+        body: "Daily reminders are now enabled!",
+        icon: "/icon-192.png"
+      });
+    } else {
+      toast.error(result.error || "Notification permission denied");
     }
   };
 

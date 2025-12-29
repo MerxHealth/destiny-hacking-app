@@ -83,6 +83,41 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
+// Handle messages from client (for notification scheduling)
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SCHEDULE_REMINDER') {
+    const { hour, minute } = event.data;
+    console.log(`Reminder scheduled for ${hour}:${minute}`);
+    // Store in IndexedDB or use Periodic Background Sync API
+  } else if (event.data && event.data.type === 'CANCEL_REMINDER') {
+    console.log('Reminder cancelled');
+  }
+});
+
+// Handle push notifications
+self.addEventListener('push', (event) => {
+  const data = event.data ? event.data.json() : {};
+  const title = data.title || 'Destiny Hacking';
+  const options = {
+    body: data.body || 'Time for your daily practice',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+    data: { url: data.url || '/' }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
+// Handle notification clicks
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow(event.notification.data.url || '/')
+  );
+});
+
 // Background sync for offline actions (future enhancement)
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-slider-states') {

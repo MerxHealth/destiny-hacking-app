@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { ChevronLeft, ChevronRight, Target, Sun, Sunset, Moon } from "lucide-react";
+import { Onboarding } from "@/components/Onboarding";
 
 /**
  * Home Screen (Command Center)
@@ -27,6 +28,27 @@ export default function NewHome() {
   
   const [currentSliderIndex, setCurrentSliderIndex] = useState(0);
   const [sliderValues, setSliderValues] = useState<Record<number, number>>({});
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Check if user has completed onboarding
+  useEffect(() => {
+    if (user) {
+      const hasCompletedOnboarding = localStorage.getItem('onboarding_completed');
+      if (!hasCompletedOnboarding) {
+        setShowOnboarding(true);
+      }
+    }
+  }, [user]);
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('onboarding_completed', 'true');
+    setShowOnboarding(false);
+  };
+
+  const handleOnboardingSkip = () => {
+    localStorage.setItem('onboarding_completed', 'true');
+    setShowOnboarding(false);
+  };
 
   // Initialize slider values from latest states
   useEffect(() => {
@@ -82,7 +104,15 @@ export default function NewHome() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      {showOnboarding && (
+        <Onboarding 
+          onComplete={handleOnboardingComplete} 
+          onSkip={handleOnboardingSkip} 
+        />
+      )}
+      
+      <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border">
         <div className="container py-4 flex items-center justify-between">
@@ -294,5 +324,6 @@ export default function NewHome() {
         </div>
       </div>
     </div>
+    </>
   );
 }

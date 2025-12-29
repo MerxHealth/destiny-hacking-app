@@ -4,6 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Gauge, Calendar, Brain, Users, TrendingUp, CheckCircle2, Flame, Settings } from "lucide-react";
+import { SliderHistoryChart } from "@/components/SliderHistoryChart";
 
 export default function Dashboard() {
   const { user, isLoading: authLoading } = useAuth();
@@ -270,6 +271,9 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         )}
+
+        {/* Emotional Trends Chart */}
+        <SliderHistoryChart />
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
