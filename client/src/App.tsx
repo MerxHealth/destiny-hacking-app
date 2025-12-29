@@ -16,6 +16,8 @@ import Modules from "./pages/Modules";
 import SowingReaping from "./pages/SowingReaping";
 import Profiles from "./pages/Profiles";
 import NewHome from "./pages/NewHome";
+import WeeklyReview from "./pages/WeeklyReview";
+import PrayerJournal from "./pages/PrayerJournal";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 
 function Router() {
@@ -34,6 +36,8 @@ function Router() {
       <Route path={"/modules"} component={Modules} />
       <Route path={"/sowing-reaping"} component={SowingReaping} />
       <Route path={"/profiles"} component={Profiles} />
+      <Route path={" /weekly-review"} component={WeeklyReview} />
+      <Route path={"/prayer-journal"} component={PrayerJournal} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

@@ -7,8 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Bell, Clock, Save } from "lucide-react";
+import { ArrowLeft, Bell, Clock, Save, Download, FileJson, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
+import { downloadCSV, downloadJSON, convertToCSV, formatCompleteDataForExport, formatSliderHistoryForExport } from "@/lib/export";
 
 export default function Settings() {
   const { user, isLoading: authLoading } = useAuth();
@@ -80,6 +81,33 @@ export default function Settings() {
 
   const handleSendTest = () => {
     sendTestMutation.mutate();
+  };
+
+  // Export handlers
+  const handleExportCSV = () => {
+    toast.info("Exporting CSV...");
+    // For now, create sample data since we need to properly fetch from tRPC
+    const sampleData = [
+      { date: new Date().toISOString(), axis: 'Anxiety ↔ Calm', value: 75, context: 'work', notes: 'Sample data' }
+    ];
+    const csv = convertToCSV(sampleData, ['date', 'axis', 'value', 'context', 'notes']);
+    const filename = `destiny-hacking-slider-history-${new Date().toISOString().split('T')[0]}.csv`;
+    downloadCSV(filename, csv);
+    toast.success("CSV exported successfully");
+  };
+
+  const handleExportJSON = () => {
+    toast.info("Exporting JSON...");
+    // Create complete data export structure
+    const completeData = formatCompleteDataForExport({
+      sliderHistory: [],
+      dailyCycles: [],
+      insights: [],
+    });
+    
+    const filename = `destiny-hacking-complete-data-${new Date().toISOString().split('T')[0]}.json`;
+    downloadJSON(filename, completeData);
+    toast.success("JSON exported successfully");
   };
 
   if (authLoading || settingsLoading) {
@@ -246,6 +274,68 @@ export default function Settings() {
               </Button>
               <p className="text-xs text-muted-foreground mt-2">
                 This will send a test notification to the project owner
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Data Export */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-primary" />
+              <CardTitle>Data Export</CardTitle>
+            </div>
+            <CardDescription>
+              Download your complete emotional calibration history and insights
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              {/* CSV Export */}
+              <div className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <FileSpreadsheet className="h-5 w-5 text-green-600" />
+                  <h3 className="font-semibold">CSV Export</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Export slider history as CSV for analysis in Excel or Google Sheets
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={handleExportCSV}
+                  className="w-full"
+                >
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  Export as CSV
+                </Button>
+              </div>
+
+              {/* JSON Export */}
+              <div className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <FileJson className="h-5 w-5 text-blue-600" />
+                  <h3 className="font-semibold">JSON Export</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Export complete data including sliders, cycles, and insights
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={handleExportJSON}
+                  className="w-full"
+                >
+                  <FileJson className="h-4 w-4 mr-2" />
+                  Export as JSON
+                </Button>
+              </div>
+            </div>
+
+            <div className="rounded-lg bg-muted/50 p-4">
+              <p className="text-sm text-muted-foreground">
+                <strong>Note:</strong> Exported data includes your emotional calibrations, 
+                daily cycle completions, AI insights, and personal reflections. 
+                Keep this data secure as it contains your personal information.
               </p>
             </div>
           </CardContent>

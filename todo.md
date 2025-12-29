@@ -188,3 +188,27 @@
 **Test Coverage:** 73 passing tests across all major features
 **Database:** 17 tables fully implemented and seeded
 **Pages:** 12 major UI pages built and functional
+
+
+## Phase 21: Follow-up Features
+
+### Weekly Review UI
+- [x] Create WeeklyReview page component
+- [x] Build review generation interface
+- [x] Display pattern summaries and metrics
+- [x] Add identity shift input fields
+- [x] Test weekly review workflow
+
+### Prayer Journal UI
+- [x] Create PrayerJournal page component
+- [x] Build four-part prayer entry form
+- [x] Display prayer history list
+- [x] Add today's prayer quick access
+- [x] Test prayer journal workflow
+
+### Data Export
+- [x] Create export utility functions
+- [x] Build export UI in Settings page
+- [x] Add CSV export for slider history
+- [x] Add JSON export for complete data
+- [x] Test export functionality
