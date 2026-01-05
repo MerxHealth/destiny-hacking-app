@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { ArrowLeft, Plus, Gauge } from "lucide-react";
 import { toast } from "sonner";
+import { useAutoAchievementCheck } from "@/hooks/useAchievements";
 
 export default function Sliders() {
   const { user, isLoading: authLoading } = useAuth();
@@ -46,10 +47,13 @@ export default function Sliders() {
     },
   });
 
+  const achievementCheck = useAutoAchievementCheck();
+  
   const recordStateMutation = trpc.sliders.recordState.useMutation({
     onSuccess: () => {
       utils.sliders.getLatestStates.invalidate();
       toast.success("Calibration recorded");
+      achievementCheck.onSuccess(); // Check for new achievements
     },
     onError: (error) => {
       toast.error(`Failed to record calibration: ${error.message}`);

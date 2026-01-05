@@ -142,6 +142,23 @@ export const appRouter = router({
     getLatestStates: protectedProcedure.query(async ({ ctx }) => {
       return db.getLatestStatesPerAxis(ctx.user.id);
     }),
+
+    // Reorder axes
+    reorderAxes: protectedProcedure
+      .input(
+        z.object({
+          axisIds: z.array(z.number()), // Array of axis IDs in new order
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        // Update displayOrder for each axis
+        await Promise.all(
+          input.axisIds.map((axisId, index) =>
+            db.updateAxis(axisId, ctx.user.id, { displayOrder: index })
+          )
+        );
+        return { success: true };
+      }),
   }),
 
   // Daily Cycle

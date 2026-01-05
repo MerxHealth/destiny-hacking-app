@@ -361,3 +361,29 @@
 - [ ] Update ShareProgress component to use preview cards
 - [ ] Test social media preview rendering
 - [ ] Verify Twitter/LinkedIn card display
+
+
+## Phase 27: Final Three Features
+
+### Social Share Preview Cards
+- [x] Add Open Graph meta tags to index.html
+- [x] Create dynamic preview image generator endpoint
+- [x] Update ShareProgress component to generate preview URLs
+- [x] Test Twitter/LinkedIn card rendering
+- [x] Verify preview images display correctly
+
+### Achievement Auto-Unlock System
+- [x] Add achievement check triggers after calibrations
+- [x] Add achievement check triggers after cycle completion
+- [x] Add achievement check triggers after module completion
+- [x] Add achievement check triggers after connection creation
+- [x] Add toast notifications for newly unlocked badges
+- [x] Test real-time badge unlocking
+
+### Axis Reordering
+- [x] Install drag-and-drop library (dnd-kit or react-beautiful-dnd)
+- [x] Add displayOrder field to emotional_axes schema
+- [x] Create reorder mutation in sliders router
+- [x] Implement drag-and-drop UI in AxisManagement
+- [x] Update queries to sort by displayOrder
+- [x] Test axis reordering functionality
