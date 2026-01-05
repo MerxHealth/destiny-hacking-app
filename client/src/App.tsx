@@ -21,6 +21,9 @@ import PrayerJournal from "./pages/PrayerJournal";
 import BiasClearing from "./pages/BiasClearing";
 import ModuleDetail from "./pages/ModuleDetail";
 import Achievements from "./pages/Achievements";
+import { Audiobook } from "./pages/Audiobook";
+import { Book } from "./pages/Book";
+import { VoiceCloning } from "./pages/VoiceCloning";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 
 function Router() {
@@ -44,6 +47,9 @@ function Router() {
       <Route path={"/prayer-journal"} component={PrayerJournal} />
       <Route path={"/bias-clearing"} component={BiasClearing} />
       <Route path={"/achievements"} component={Achievements} />
+      <Route path={"/audiobook"} component={Audiobook} />
+      <Route path={"/book"} component={Book} />
+      <Route path={"/voice-cloning"} component={VoiceCloning} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

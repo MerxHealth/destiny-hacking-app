@@ -674,6 +674,57 @@ Provide a brief Stoic strategist reflection (2-3 sentences) on the cause-effect 
           progress: totalDays > 0 ? (completedDays / totalDays) * 100 : 0,
         };
       }),
+
+    // Get challenge statistics (leaderboard data)
+    getStats: protectedProcedure
+      .input(z.object({ challengeId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const session = await db.getSessionById(input.challengeId);
+        if (!session) {
+          throw new Error("Challenge not found");
+        }
+
+        const participants = await db.getSessionParticipants(input.challengeId);
+        const participantCount = participants.length;
+
+        // Calculate stats for each participant
+        let totalCompletions = 0;
+        let totalStreak = 0;
+        let topStreak = 0;
+
+        for (const participant of participants) {
+          const cycles = await db.getCyclesInDateRange(
+            participant.userId,
+            session.startDate,
+            session.endDate
+          );
+
+          const completedDays = cycles.filter(c => c.isComplete).length;
+          totalCompletions += completedDays;
+
+          // Calculate current streak
+          let currentStreak = 0;
+          for (let i = cycles.length - 1; i >= 0; i--) {
+            if (cycles[i].isComplete) {
+              currentStreak++;
+            } else {
+              break;
+            }
+          }
+
+          totalStreak += currentStreak;
+          if (currentStreak > topStreak) {
+            topStreak = currentStreak;
+          }
+        }
+
+        return {
+          participants: participantCount,
+          totalCompletions,
+          averageStreak: participantCount > 0 ? totalStreak / participantCount : 0,
+          topStreak,
+        };
+      }),
   }),
 
   // Slider Profiles & Presets
@@ -1073,6 +1124,151 @@ Provide a brief Stoic strategist reflection (2-3 sentences) on the cause-effect 
       .query(async ({ ctx, input }) => {
         return db.getAlignmentSessionById(input.sessionId, ctx.user.id);
        }),
+  }),
+
+  // Audiobook
+  audiobook: router({ // Get chapter by ID
+    getChapter: protectedProcedure
+      .input(z.object({ chapterId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return db.getAudiobookChapter(input.chapterId);
+      }),
+
+    // List all chapters
+    listChapters: protectedProcedure.query(async ({ ctx }) => {
+      return db.listAudiobookChapters();
+    }),
+
+    // Get user progress for a chapter
+    getProgress: protectedProcedure
+      .input(z.object({ chapterId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return db.getAudiobookProgress(ctx.user.id, input.chapterId);
+      }),
+
+    // Update playback progress
+    updateProgress: protectedProcedure
+      .input(z.object({
+        chapterId: z.number(),
+        currentPosition: z.number(),
+        playbackSpeed: z.number(),
+        completed: z.boolean().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.updateAudiobookProgress({
+          userId: ctx.user.id,
+          chapterId: input.chapterId,
+          currentPosition: input.currentPosition,
+          playbackSpeed: input.playbackSpeed,
+          completed: input.completed || false,
+        });
+      }),
+
+    // Create bookmark
+    createBookmark: protectedProcedure
+      .input(z.object({
+        chapterId: z.number(),
+        position: z.number(),
+        title: z.string().optional(),
+        note: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.createAudiobookBookmark({
+          userId: ctx.user.id,
+          ...input,
+        });
+      }),
+
+    // List bookmarks for a chapter
+    listBookmarks: protectedProcedure
+      .input(z.object({ chapterId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return db.listAudiobookBookmarks(ctx.user.id, input.chapterId);
+      }),
+  }),
+
+  // PDF Book
+  pdf: router({
+    // Get chapter by ID
+    getChapter: protectedProcedure
+      .input(z.object({ chapterId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return db.getPdfChapter(input.chapterId);
+      }),
+
+    // List all chapters
+    listChapters: protectedProcedure.query(async ({ ctx }) => {
+      return db.listPdfChapters();
+    }),
+
+    // Get user reading progress
+    getProgress: protectedProcedure.query(async ({ ctx }) => {
+      return db.getPdfProgress(ctx.user.id);
+    }),
+
+    // Update reading progress
+    updateProgress: protectedProcedure
+      .input(z.object({
+        currentPage: z.number(),
+        totalPages: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.updatePdfProgress({
+          userId: ctx.user.id,
+          currentPage: input.currentPage,
+          totalPages: input.totalPages,
+        });
+      }),
+
+    // Create bookmark
+    createBookmark: protectedProcedure
+      .input(z.object({
+        pageNumber: z.number(),
+        title: z.string().optional(),
+        note: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.createPdfBookmark({
+          userId: ctx.user.id,
+          ...input,
+        });
+      }),
+
+    // List bookmarks
+    listBookmarks: protectedProcedure.query(async ({ ctx }) => {
+      return db.listPdfBookmarks(ctx.user.id);
+    }),
+  }),
+
+  // Voice Cloning
+  voice: router({
+    // List user's voice models
+    listModels: protectedProcedure.query(async ({ ctx }) => {
+      return db.getUserVoiceModels(ctx.user.id);
+    }),
+
+    // Get ready voice model
+    getReadyModel: protectedProcedure.query(async ({ ctx }) => {
+      return db.getReadyVoiceModel(ctx.user.id);
+    }),
+
+    // Create voice model (placeholder - actual implementation requires voice cloning API)
+    createModel: protectedProcedure
+      .input(z.object({
+        modelName: z.string().min(1).max(100),
+        sampleAudioUrl: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // TODO: Integrate with voice cloning API (ElevenLabs, etc.)
+        const modelId = `voice_${Date.now()}`;
+        
+        return db.createVoiceModel({
+          userId: ctx.user.id,
+          modelId,
+          modelName: input.modelName,
+          sampleAudioUrl: input.sampleAudioUrl,
+        });
+      }),
   }),
 
   // Achievements

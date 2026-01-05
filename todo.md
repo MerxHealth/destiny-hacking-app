@@ -387,3 +387,164 @@
 - [x] Implement drag-and-drop UI in AxisManagement
 - [x] Update queries to sort by displayOrder
 - [x] Test axis reordering functionality
+
+
+## Phase 28: Final Three Features
+
+### Module Content Pages
+- [ ] Enhance ModuleDetail page to display full module content
+- [ ] Show Core Principle, Mental Model, Daily Practice sections
+- [ ] Add practice day completion tracking interface
+- [ ] Implement challenge completion workflow
+- [ ] Add reflection entry form
+- [ ] Test module learning flow
+
+### Challenge Leaderboard
+- [ ] Create leaderboard component for Challenges page
+- [ ] Fetch group-wide completion stats
+- [ ] Display collective progress without individual content
+- [ ] Show streak counts and completion rates
+- [ ] Add sorting and filtering options
+- [ ] Test leaderboard display
+
+### Notification Scheduling
+- [ ] Create server-side notification scheduler
+- [ ] Implement cron job for daily reminders
+- [ ] Send notifications at user-configured times
+- [ ] Add notification delivery tracking
+- [ ] Test scheduled notification delivery
+
+
+## Phase 29: Audiobook & PDF Book Integration
+
+### Audiobook Player
+- [ ] Create audiobook database schema (chapters, audio files, bookmarks)
+- [ ] Build AudiobookPlayer component with controls (play/pause, speed, skip)
+- [ ] Add chapter navigation and progress tracking
+- [ ] Implement bookmarks and sleep timer
+- [ ] Create audiobook library page
+
+### PDF Book Viewer
+- [ ] Add PDF viewer library (react-pdf or pdf.js)
+- [ ] Create BookReader component with page navigation
+- [ ] Implement chapter sync with table of contents
+- [ ] Add highlighting and note-taking features
+- [ ] Create bookmarks system
+
+### Voice Cloning Workflow
+- [ ] Create voice sample recording interface
+- [ ] Integrate voice cloning API
+- [ ] Build audio generation pipeline for book chapters
+- [ ] Add voice model management
+- [ ] Test narration quality
+
+### Unified Experience
+- [ ] Cross-link modules ↔ audiobook chapters ↔ PDF chapters
+- [ ] Add "Switch Format" buttons (Listen/Read/Practice)
+- [ ] Sync progress across all three formats
+- [ ] Create unified navigation system
+- [ ] Test complete user journey
+
+### Progress Tracking
+- [ ] Track audiobook listening progress
+- [ ] Track PDF reading progress
+- [ ] Sync with module completion
+- [ ] Add achievement badges for book completion
+- [ ] Create progress dashboard
+
+
+## Phase 30: Multi-Format Book Experience (IN PROGRESS)
+
+### Database & Backend Infrastructure ✅
+- [x] Create database schema for audiobook chapters (book_chapters table)
+- [x] Create audiobook_progress table for listening tracking
+- [x] Create pdf_reading_progress table for reading tracking
+- [x] Create bookmarks table for both audio and PDF
+- [x] Create voice_models table for voice cloning
+- [x] Add database functions for audiobook operations
+- [x] Add database functions for PDF operations
+- [x] Add database functions for voice cloning
+- [x] Create tRPC audiobook router with all procedures
+- [x] Create tRPC PDF router with all procedures
+- [x] Create tRPC voice cloning router with all procedures
+- [x] Write and pass 21 backend tests for all features
+
+### Audiobook Player ✅
+- [x] Create AudiobookPlayer component with playback controls
+- [x] Implement play/pause functionality
+- [x] Add 15-second skip forward/backward
+- [x] Add playback speed control (0.75x, 1.0x, 1.25x, 1.5x, 2.0x)
+- [x] Add volume control with mute toggle
+- [x] Implement progress bar with seek functionality
+- [x] Add bookmark creation at current position
+- [x] Save playback progress every 10 seconds
+- [x] Create Audiobook page with chapter list
+- [x] Add format switcher (Listen ↔ Read ↔ Practice)
+- [x] Add audiobook route to App.tsx
+- [x] Add audiobook link to Command Center
+
+### PDF Book Viewer ✅
+- [x] Create Book page with reading progress display
+- [x] Add chapter navigation for PDF
+- [x] Track current page and percent complete
+- [x] Add PDF bookmark creation
+- [x] Add format switcher (Read ↔ Listen ↔ Practice)
+- [x] Add book route to App.tsx
+- [x] Add book link to Command Center
+
+### Voice Cloning Workflow ✅
+- [x] Create VoiceCloning page with recording interface
+- [x] Implement browser audio recording (MediaRecorder API)
+- [x] Add recording timer (10-15 minute target)
+- [x] Add playback preview of recorded audio
+- [x] Add voice model name input
+- [x] Display existing voice models with status
+- [x] Add voice cloning route to App.tsx
+- [x] Validate recording duration (10-15 minutes)
+
+### Voice Cloning API Integration 🚧
+- [ ] Research voice cloning APIs (ElevenLabs, PlayHT, Resemble.ai)
+- [ ] Choose voice cloning provider
+- [ ] Integrate voice cloning API
+- [ ] Implement audio file upload to S3
+- [ ] Send audio to voice cloning API for training
+- [ ] Poll for training completion
+- [ ] Update voice model status (pending → training → ready → failed)
+- [ ] Handle API errors and retries
+
+### Audiobook Generation 🚧
+- [ ] Prepare book manuscript text (500 pages)
+- [ ] Split manuscript into 14 chapter scripts
+- [ ] Create text-to-speech generation workflow
+- [ ] Generate audio for each chapter using cloned voice
+- [ ] Upload generated audio files to S3
+- [ ] Update book_chapters table with audio URLs and durations
+- [ ] Seed database with all 14 audiobook chapters
+- [ ] Test complete audiobook playback flow
+
+### PDF Book Integration 🚧
+- [ ] Prepare final PDF manuscript (500 pages)
+- [ ] Upload PDF to S3
+- [ ] Implement react-pdf viewer component
+- [ ] Add PDF navigation controls
+- [ ] Implement text highlighting functionality
+- [ ] Add note-taking on highlighted text
+- [ ] Sync PDF page numbers with book_chapters table
+- [ ] Test PDF reading experience
+
+### Cross-Format Sync 🚧
+- [ ] Implement progress sync between audiobook ↔ PDF ↔ modules
+- [ ] Add "Continue where you left off" feature
+- [ ] Create unified progress dashboard
+- [ ] Sync chapter completion across formats
+- [ ] Add achievement badges for multi-format completion
+- [ ] Test cross-format navigation flow
+
+### Enhanced Features 🚧
+- [ ] Add sleep timer for audiobook (15/30/45/60 minutes)
+- [ ] Implement chapter auto-advance
+- [ ] Add audiobook download for offline listening
+- [ ] Add PDF annotation export
+- [ ] Create shareable highlights from PDF
+- [ ] Add audiobook playback statistics
+- [ ] Implement reading time estimates for PDF

@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, json, index, unique } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, json, index, unique, decimal } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
 
 /**
@@ -641,6 +641,144 @@ export const achievements = mysqlTable("achievements", {
 
 export type Achievement = typeof achievements.$inferSelect;
 export type InsertAchievement = typeof achievements.$inferInsert;
+
+// ============================================================================
+// AUDIOBOOK & PDF BOOK SYSTEM
+// ============================================================================
+
+/**
+ * Book Chapters define the structure of both the audiobook and PDF book.
+ * Each chapter maps to a module and contains audio/PDF metadata.
+ */
+export const bookChapters = mysqlTable("book_chapters", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Chapter details
+  chapterNumber: int("chapterNumber").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  
+  // Module linkage
+  moduleId: int("moduleId"), // Links to bookModules.id
+  
+  // Audio details
+  audioUrl: text("audioUrl"), // S3 URL to audio file
+  audioDuration: int("audioDuration"), // Duration in seconds
+  audioGenerated: boolean("audioGenerated").default(false).notNull(),
+  
+  // PDF details
+  pdfStartPage: int("pdfStartPage"),
+  pdfEndPage: int("pdfEndPage"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  chapterNumberIdx: index("book_chapters_chapter_number_idx").on(table.chapterNumber),
+  moduleIdIdx: index("book_chapters_module_id_idx").on(table.moduleId),
+}));
+
+export type BookChapter = typeof bookChapters.$inferSelect;
+export type InsertBookChapter = typeof bookChapters.$inferInsert;
+
+/**
+ * Audiobook Progress tracks user listening progress for each chapter.
+ */
+export const audiobookProgress = mysqlTable("audiobook_progress", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  chapterId: int("chapterId").notNull(),
+  
+  // Progress tracking
+  currentPosition: int("currentPosition").default(0).notNull(), // Seconds
+  completed: boolean("completed").default(false).notNull(),
+  completedAt: timestamp("completedAt"),
+  
+  // Playback settings
+  playbackSpeed: decimal("playbackSpeed", { precision: 3, scale: 1 }).default("1.0").notNull(),
+  
+  lastListenedAt: timestamp("lastListenedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("audiobook_progress_user_id_idx").on(table.userId),
+  chapterIdIdx: index("audiobook_progress_chapter_id_idx").on(table.chapterId),
+  uniqueUserChapter: index("audiobook_progress_unique_user_chapter").on(table.userId, table.chapterId),
+}));
+
+export type AudiobookProgress = typeof audiobookProgress.$inferSelect;
+export type InsertAudiobookProgress = typeof audiobookProgress.$inferInsert;
+
+/**
+ * PDF Reading Progress tracks user reading progress.
+ */
+export const pdfReadingProgress = mysqlTable("pdf_reading_progress", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  
+  // Progress tracking
+  currentPage: int("currentPage").default(1).notNull(),
+  totalPages: int("totalPages").notNull(),
+  percentComplete: decimal("percentComplete", { precision: 5, scale: 2 }).default("0.00").notNull(),
+  
+  lastReadAt: timestamp("lastReadAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("pdf_reading_progress_user_id_idx").on(table.userId),
+}));
+
+export type PdfReadingProgress = typeof pdfReadingProgress.$inferSelect;
+export type InsertPdfReadingProgress = typeof pdfReadingProgress.$inferInsert;
+
+/**
+ * Bookmarks allow users to save specific positions in audiobook or PDF.
+ */
+export const bookmarks = mysqlTable("bookmarks", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  
+  // Bookmark type and location
+  bookmarkType: mysqlEnum("bookmarkType", ["audiobook", "pdf"]).notNull(),
+  chapterId: int("chapterId"), // For audiobook bookmarks
+  pageNumber: int("pageNumber"), // For PDF bookmarks
+  position: int("position"), // Seconds for audio, character offset for PDF
+  
+  // Bookmark details
+  title: varchar("title", { length: 255 }),
+  note: text("note"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("bookmarks_user_id_idx").on(table.userId),
+  typeIdx: index("bookmarks_type_idx").on(table.bookmarkType),
+}));
+
+export type Bookmark = typeof bookmarks.$inferSelect;
+export type InsertBookmark = typeof bookmarks.$inferInsert;
+
+/**
+ * Voice Models store user's cloned voice data for audiobook generation.
+ */
+export const voiceModels = mysqlTable("voice_models", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  
+  // Voice model details
+  modelId: varchar("modelId", { length: 255 }).notNull(), // External API model ID
+  modelName: varchar("modelName", { length: 255 }).notNull(),
+  sampleAudioUrl: text("sampleAudioUrl"), // S3 URL to sample recording
+  
+  // Status
+  status: mysqlEnum("status", ["pending", "training", "ready", "failed"]).default("pending").notNull(),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("voice_models_user_id_idx").on(table.userId),
+  modelIdIdx: index("voice_models_model_id_idx").on(table.modelId),
+}));
+
+export type VoiceModel = typeof voiceModels.$inferSelect;
+export type InsertVoiceModel = typeof voiceModels.$inferInsert;
 
 // ============================================================================
 // DRIZZLE RELATIONS (for easier querying)

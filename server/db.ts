@@ -16,6 +16,11 @@ import {
   groupParticipants,
   achievements,
   moduleProgress,
+  bookChapters,
+  audiobookProgress,
+  bookmarks,
+  pdfReadingProgress,
+  voiceModels,
   type EmotionalAxis,
   type InsertEmotionalAxis,
   type SliderState,
@@ -1276,4 +1281,256 @@ export async function getInsightCount(userId: number) {
     .where(eq(insights.userId, userId));
   
   return result[0]?.count || 0;
+}
+
+// ==================== AUDIOBOOK ====================
+
+export async function getAudiobookChapter(chapterId: number) {
+  const result = await db
+    .select()
+    .from(bookChapters)
+    .where(eq(bookChapters.id, chapterId))
+    .limit(1);
+  
+  return result[0] || null;
+}
+
+export async function listAudiobookChapters() {
+  return db
+    .select()
+    .from(bookChapters)
+    .where(sql`${bookChapters.audioUrl} IS NOT NULL`)
+    .orderBy(bookChapters.chapterNumber);
+}
+
+export async function getAudiobookProgress(userId: number, chapterId: number) {
+  const result = await db
+    .select()
+    .from(audiobookProgress)
+    .where(and(
+      eq(audiobookProgress.userId, userId),
+      eq(audiobookProgress.chapterId, chapterId)
+    ))
+    .limit(1);
+  
+  return result[0] || null;
+}
+
+export async function updateAudiobookProgress(data: {
+  userId: number;
+  chapterId: number;
+  currentPosition: number;
+  playbackSpeed: number;
+  completed: boolean;
+}) {
+  // Check if progress exists
+  const existing = await getAudiobookProgress(data.userId, data.chapterId);
+  
+  if (existing) {
+    // Update existing progress
+    await db
+      .update(audiobookProgress)
+      .set({
+        currentPosition: data.currentPosition,
+        playbackSpeed: data.playbackSpeed.toString(),
+        completed: data.completed,
+        lastListenedAt: new Date(),
+      })
+      .where(and(
+        eq(audiobookProgress.userId, data.userId),
+        eq(audiobookProgress.chapterId, data.chapterId)
+      ));
+    
+    return getAudiobookProgress(data.userId, data.chapterId);
+  } else {
+    // Create new progress record
+    const result = await db.insert(audiobookProgress).values({
+      userId: data.userId,
+      chapterId: data.chapterId,
+      currentPosition: data.currentPosition,
+      playbackSpeed: data.playbackSpeed.toString(),
+      completed: data.completed,
+      lastListenedAt: new Date(),
+    });
+    
+    return getAudiobookProgress(data.userId, data.chapterId);
+  }
+}
+
+export async function createAudiobookBookmark(data: {
+  userId: number;
+  chapterId: number;
+  position: number;
+  title?: string;
+  note?: string;
+}) {
+  const result = await db.insert(bookmarks).values({
+    userId: data.userId,
+    bookmarkType: "audiobook" as const,
+    chapterId: data.chapterId,
+    position: data.position,
+    title: data.title || null,
+    note: data.note || null,
+    createdAt: new Date(),
+  });
+  
+  return result;
+}
+
+export async function listAudiobookBookmarks(userId: number, chapterId: number) {
+  return db
+    .select()
+    .from(bookmarks)
+    .where(and(
+      eq(bookmarks.userId, userId),
+      eq(bookmarks.bookmarkType, "audiobook"),
+      eq(bookmarks.chapterId, chapterId)
+    ))
+    .orderBy(bookmarks.position);
+}
+
+// ==================== PDF BOOK ====================
+
+export async function getPdfChapter(chapterId: number) {
+  const result = await db
+    .select()
+    .from(bookChapters)
+    .where(eq(bookChapters.id, chapterId))
+    .limit(1);
+  
+  return result[0] || null;
+}
+
+export async function listPdfChapters() {
+  return db
+    .select()
+    .from(bookChapters)
+    .where(sql`${bookChapters.pdfStartPage} IS NOT NULL`)
+    .orderBy(bookChapters.chapterNumber);
+}
+
+export async function getPdfProgress(userId: number) {
+  const result = await db
+    .select()
+    .from(pdfReadingProgress)
+    .where(eq(pdfReadingProgress.userId, userId))
+    .limit(1);
+  
+  return result[0] || null;
+}
+
+export async function updatePdfProgress(data: {
+  userId: number;
+  currentPage: number;
+  totalPages: number;
+}) {
+  // Check if progress exists
+  const existing = await getPdfProgress(data.userId);
+  
+  const percentComplete = ((data.currentPage / data.totalPages) * 100).toFixed(2);
+  
+  if (existing) {
+    // Update existing progress
+    await db
+      .update(pdfReadingProgress)
+      .set({
+        currentPage: data.currentPage,
+        totalPages: data.totalPages,
+        percentComplete,
+        lastReadAt: new Date(),
+      })
+      .where(eq(pdfReadingProgress.userId, data.userId));
+    
+    return getPdfProgress(data.userId);
+  } else {
+    // Create new progress record
+    await db.insert(pdfReadingProgress).values({
+      userId: data.userId,
+      currentPage: data.currentPage,
+      totalPages: data.totalPages,
+      percentComplete,
+      lastReadAt: new Date(),
+      createdAt: new Date(),
+    });
+    
+    return getPdfProgress(data.userId);
+  }
+}
+
+export async function createPdfBookmark(data: {
+  userId: number;
+  pageNumber: number;
+  title?: string;
+  note?: string;
+}) {
+  const result = await db.insert(bookmarks).values({
+    userId: data.userId,
+    bookmarkType: "pdf" as const,
+    pageNumber: data.pageNumber,
+    title: data.title || null,
+    note: data.note || null,
+    createdAt: new Date(),
+  });
+  
+  return result;
+}
+
+export async function listPdfBookmarks(userId: number) {
+  return db
+    .select()
+    .from(bookmarks)
+    .where(and(
+      eq(bookmarks.userId, userId),
+      eq(bookmarks.bookmarkType, "pdf")
+    ))
+    .orderBy(bookmarks.pageNumber);
+}
+
+// ==================== VOICE CLONING ====================
+
+export async function createVoiceModel(data: {
+  userId: number;
+  modelId: string;
+  modelName: string;
+  sampleAudioUrl?: string;
+}) {
+  const result = await db.insert(voiceModels).values({
+    userId: data.userId,
+    modelId: data.modelId,
+    modelName: data.modelName,
+    sampleAudioUrl: data.sampleAudioUrl || null,
+    status: "pending" as const,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+  
+  return result;
+}
+
+export async function getUserVoiceModels(userId: number) {
+  return db
+    .select()
+    .from(voiceModels)
+    .where(eq(voiceModels.userId, userId))
+    .orderBy(desc(voiceModels.createdAt));
+}
+
+export async function getReadyVoiceModel(userId: number) {
+  const result = await db
+    .select()
+    .from(voiceModels)
+    .where(and(
+      eq(voiceModels.userId, userId),
+      eq(voiceModels.status, "ready")
+    ))
+    .limit(1);
+  
+  return result[0] || null;
+}
+
+export async function updateVoiceModelStatus(modelId: string, status: "pending" | "training" | "ready" | "failed") {
+  await db
+    .update(voiceModels)
+    .set({ status, updatedAt: new Date() })
+    .where(eq(voiceModels.modelId, modelId));
 }

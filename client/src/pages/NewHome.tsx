@@ -325,6 +325,12 @@ export default function NewHome() {
             <Link href="/modules">📚 Learning Path</Link>
           </Button>
           <Button asChild variant="ghost" size="sm">
+            <Link href="/audiobook">🎧 Audiobook</Link>
+          </Button>
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/book">📖 Read Book</Link>
+          </Button>
+          <Button asChild variant="ghost" size="sm">
             <Link href="/weekly-review">📊 Weekly Review</Link>
           </Button>
           <Button asChild variant="ghost" size="sm">
