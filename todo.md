@@ -313,3 +313,13 @@
 - [x] Show countdown timer for grace period expiry
 - [x] Add "Complete Yesterday" button
 - [x] Test grace period flow
+
+
+## Bug Fix: Duplicate Emotional Axes
+
+- [x] Investigate why axes are duplicating (3x Anxiety↔Calm, 2x Test Left↔Test Right, 1x Fear↔Courage)
+- [x] Check database for duplicate axis entries
+- [x] Fix axis creation logic to prevent duplicates
+- [x] Ensure 6 unique bipolar axes are displayed
+- [x] Update UI to show distinct emotional dimensions
+- [x] Test axis display on Command Center and Sliders page

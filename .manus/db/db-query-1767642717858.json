@@ -1,0 +1,66 @@
+{
+  "query": "SELECT id, userId, leftLabel, rightLabel, description FROM emotional_axes ORDER BY userId, id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4S4NaSTm8gULMAn.ab4bddc10a61 --database fsRnWghWhaoD2r3KXXoRti --execute SELECT id, userId, leftLabel, rightLabel, description FROM emotional_axes ORDER BY userId, id",
+  "rows": [
+    {
+      "id": "1",
+      "userId": "1",
+      "leftLabel": "Anxiety",
+      "rightLabel": "Calm",
+      "description": "Measures courage in work situations"
+    },
+    {
+      "id": "2",
+      "userId": "1",
+      "leftLabel": "Test Left",
+      "rightLabel": "Test Right",
+      "description": "NULL"
+    },
+    {
+      "id": "30001",
+      "userId": "1",
+      "leftLabel": "Anxiety",
+      "rightLabel": "Calm",
+      "description": "NULL"
+    },
+    {
+      "id": "30002",
+      "userId": "1",
+      "leftLabel": "Test Left",
+      "rightLabel": "Test Right",
+      "description": "NULL"
+    },
+    {
+      "id": "60001",
+      "userId": "1",
+      "leftLabel": "Anxiety",
+      "rightLabel": "Calm",
+      "description": "NULL"
+    },
+    {
+      "id": "60002",
+      "userId": "1",
+      "leftLabel": "Fear",
+      "rightLabel": "Courage",
+      "description": "Measures courage in work situations"
+    },
+    {
+      "id": "60003",
+      "userId": "1",
+      "leftLabel": "Test Left",
+      "rightLabel": "Test Right",
+      "description": "NULL"
+    },
+    {
+      "id": "60004",
+      "userId": "1",
+      "leftLabel": "Test Left",
+      "rightLabel": "Test Right",
+      "description": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tleftLabel\trightLabel\tdescription\n1\t1\tAnxiety\tCalm\tMeasures courage in work situations\n2\t1\tTest Left\tTest Right\tNULL\n30001\t1\tAnxiety\tCalm\tNULL\n30002\t1\tTest Left\tTest Right\tNULL\n60001\t1\tAnxiety\tCalm\tNULL\n60002\t1\tFear\tCourage\tMeasures courage in work situations\n60003\t1\tTest Left\tTest Right\tNULL\n60004\t1\tTest Left\tTest Right\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 87
+}
