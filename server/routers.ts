@@ -1194,6 +1194,23 @@ Provide a brief Stoic strategist reflection (2-3 sentences) on the cause-effect 
         return chapter;
       }),
 
+    // Generate all 14 chapters (admin only)
+    generateAllChapters: protectedProcedure
+      .input(z.object({ voiceRecordingUrl: z.string().url() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
+        }
+
+        // Import generation function
+        const { generateAllChapters } = await import("./generateAllChapters");
+        
+        // Run generation (this will take 30-60 minutes)
+        const result = await generateAllChapters(input.voiceRecordingUrl);
+        
+        return result;
+      }),
+
     // Get user progress for a chapter
     getProgress: protectedProcedure
       .input(z.object({ chapterId: z.number() }))

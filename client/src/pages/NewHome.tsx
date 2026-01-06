@@ -443,6 +443,12 @@ export default function NewHome() {
           <Button asChild variant="ghost" size="sm">
             <Link href="/settings">⚙️ Settings</Link>
           </Button>
+          <Button asChild variant="default" size="lg" className="bg-red-600 hover:bg-red-700">
+            <Link href="/record-voice">🎙️ RECORD YOUR VOICE (Step 1)</Link>
+          </Button>
+          <Button asChild variant="default" size="lg" className="bg-green-600 hover:bg-green-700">
+            <Link href="/generate-audiobook">🎬 GENERATE AUDIOBOOK (Step 2)</Link>
+          </Button>
           <Button asChild variant="ghost" size="sm">
             <Link href="/voice-cloning">🎙️ Voice Clone (Admin)</Link>
           </Button>

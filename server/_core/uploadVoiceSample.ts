@@ -18,7 +18,7 @@ export async function uploadVoiceSample(req: Request, res: Response) {
 
     const [fields, files] = await form.parse(req);
 
-    const file = Array.isArray(files.file) ? files.file[0] : files.file;
+    const file = Array.isArray(files.audio) ? files.audio[0] : files.audio;
 
     if (!file) {
       return res.status(400).json({ error: "No file uploaded" });

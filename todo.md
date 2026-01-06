@@ -649,3 +649,40 @@
 - [x] Style card with gradient background and primary color accents
 - [x] Add hover effects on format cards
 - [x] Only show card when progress > 0%
+
+
+## Phase 37: Simplified Audiobook Workflow - Record & Generate in Manus (IN PROGRESS)
+- [ ] Create dedicated voice recording page with sample text
+- [ ] Display sample text for author to read (10-15 minutes)
+- [ ] Implement browser-based audio recording
+- [ ] Add recording timer and playback preview
+- [ ] Upload recorded audio to S3
+- [ ] Clone author voice using ElevenLabs API
+- [ ] Create interface to paste all 14 chapter manuscripts
+- [ ] Generate audiobook narration for all chapters using cloned voice
+- [ ] Upload generated audio files to S3
+- [ ] Seed database with audiobook chapters and audio URLs
+- [ ] Remove voice cloning features from app (admin pages)
+- [ ] Test complete audiobook playback in app
+
+
+## Phase 38: Fix Voice Recording Upload (COMPLETED)
+- [x] Reduce minimum recording time from 10 minutes to 3 minutes
+- [x] Fix upload endpoint to handle audio file upload (corrected field name)
+- [x] Store uploaded audio in S3
+- [x] Return audio URL to frontend
+- [x] Server restarted with fixes
+
+
+## Phase 39: Admin Audiobook Generation Interface (COMPLETED)
+- [x] Copy chapter text files to app directory (manuscript-chapters/)
+- [x] Extract all 14 chapters from PDF manuscript
+- [x] Build admin page to display chapters and generate button (/generate-audiobook)
+- [x] Add progress tracking UI with real-time updates
+- [x] Implement backend batch generation endpoint (generateAllChapters)
+- [x] Create generateAllChapters.ts with voice cloning logic
+- [x] Add ElevenLabs voice cloning integration
+- [x] Add audio generation for all 14 chapters
+- [x] Upload audio files to S3 and save to database
+- [x] Add voice recording URL input field
+- [x] Create standalone generation script (scripts/generate-audiobook.ts)
