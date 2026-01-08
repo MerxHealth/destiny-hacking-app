@@ -686,3 +686,18 @@
 - [x] Upload audio files to S3 and save to database
 - [x] Add voice recording URL input field
 - [x] Create standalone generation script (scripts/generate-audiobook.ts)
+
+## Phase 40: OpenAI TTS Audiobook Generation (COMPLETED)
+- [x] Received OpenAI API key from user
+- [x] Added OPENAI_API_KEY to environment
+- [x] Created OpenAI TTS helper module (server/_core/openai-tts.ts)
+- [x] Validated API key with test (generated 64KB test audio)
+- [x] Created audiobook generation script (scripts/generate-audiobook-openai.ts)
+- [x] Generated all 14 chapters with Onyx voice (deep male)
+- [x] Split chapters into 4KB chunks to handle API limits
+- [x] Concatenated chunks with ffmpeg
+- [x] Uploaded all audio files to S3 (~260MB total)
+- [x] Saved all chapters to database with durations
+- [x] Total generation time: 39.5 minutes
+- [x] Total duration: 4 hours 14 minutes of narrated content
+- [x] Verified app is running and accessible
