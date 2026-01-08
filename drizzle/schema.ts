@@ -782,6 +782,65 @@ export const voiceModels = mysqlTable("voice_models", {
 export type VoiceModel = typeof voiceModels.$inferSelect;
 export type InsertVoiceModel = typeof voiceModels.$inferInsert;
 
+/**
+ * PDF Highlights allow users to highlight text in the PDF book.
+ */
+export const pdfHighlights = mysqlTable("pdf_highlights", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  
+  // Location in PDF
+  pageNumber: int("pageNumber").notNull(),
+  chapterId: int("chapterId"), // Optional link to chapter
+  
+  // Text selection details
+  selectedText: text("selectedText").notNull(),
+  startOffset: int("startOffset").notNull(), // Character offset in page
+  endOffset: int("endOffset").notNull(),
+  
+  // Highlight styling
+  color: varchar("color", { length: 20 }).default("yellow").notNull(), // yellow, green, blue, pink
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("pdf_highlights_user_id_idx").on(table.userId),
+  pageNumberIdx: index("pdf_highlights_page_number_idx").on(table.pageNumber),
+}));
+
+export type PdfHighlight = typeof pdfHighlights.$inferSelect;
+export type InsertPdfHighlight = typeof pdfHighlights.$inferInsert;
+
+/**
+ * PDF Annotations allow users to add notes to specific locations in the PDF.
+ */
+export const pdfAnnotations = mysqlTable("pdf_annotations", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  
+  // Location in PDF
+  pageNumber: int("pageNumber").notNull(),
+  chapterId: int("chapterId"), // Optional link to chapter
+  highlightId: int("highlightId"), // Optional link to highlight
+  
+  // Annotation content
+  note: text("note").notNull(),
+  contextText: text("contextText"), // Surrounding text for context
+  
+  // Position for display
+  xPosition: int("xPosition"), // X coordinate on page
+  yPosition: int("yPosition"), // Y coordinate on page
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("pdf_annotations_user_id_idx").on(table.userId),
+  pageNumberIdx: index("pdf_annotations_page_number_idx").on(table.pageNumber),
+  highlightIdIdx: index("pdf_annotations_highlight_id_idx").on(table.highlightId),
+}));
+
+export type PdfAnnotation = typeof pdfAnnotations.$inferSelect;
+export type InsertPdfAnnotation = typeof pdfAnnotations.$inferInsert;
+
 // ============================================================================
 // DRIZZLE RELATIONS (for easier querying)
 // ============================================================================

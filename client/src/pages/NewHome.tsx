@@ -411,6 +411,9 @@ export default function NewHome() {
         {/* Quick Links */}
         <div className="mt-8 flex flex-wrap gap-4 justify-center">
           <Button asChild variant="ghost" size="sm">
+            <Link href="/progress">📊 Progress Dashboard</Link>
+          </Button>
+          <Button asChild variant="ghost" size="sm">
             <Link href="/modules">📚 Learning Path</Link>
           </Button>
           <Button asChild variant="ghost" size="sm">

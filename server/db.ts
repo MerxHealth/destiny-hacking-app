@@ -20,6 +20,8 @@ import {
   audiobookProgress,
   bookmarks,
   pdfReadingProgress,
+  pdfHighlights,
+  pdfAnnotations,
   voiceModels,
   type EmotionalAxis,
   type InsertEmotionalAxis,
@@ -1512,6 +1514,126 @@ export async function listPdfBookmarks(userId: number) {
       eq(bookmarks.bookmarkType, "pdf")
     ))
     .orderBy(bookmarks.pageNumber);
+}
+
+// ==================== PDF HIGHLIGHTS ====================
+
+export async function createPdfHighlight(data: {
+  userId: number;
+  pageNumber: number;
+  chapterId?: number;
+  selectedText: string;
+  startOffset: number;
+  endOffset: number;
+  color?: string;
+}) {
+  const result = await db.insert(pdfHighlights).values({
+    userId: data.userId,
+    pageNumber: data.pageNumber,
+    chapterId: data.chapterId || null,
+    selectedText: data.selectedText,
+    startOffset: data.startOffset,
+    endOffset: data.endOffset,
+    color: data.color || "yellow",
+  });
+  
+  return result;
+}
+
+export async function listPdfHighlights(userId: number, pageNumber?: number) {
+  const conditions = [eq(pdfHighlights.userId, userId)];
+  
+  if (pageNumber !== undefined) {
+    conditions.push(eq(pdfHighlights.pageNumber, pageNumber));
+  }
+  
+  return db
+    .select()
+    .from(pdfHighlights)
+    .where(and(...conditions))
+    .orderBy(pdfHighlights.pageNumber, pdfHighlights.startOffset);
+}
+
+export async function updatePdfHighlight(highlightId: number, userId: number, data: {
+  color?: string;
+}) {
+  await db
+    .update(pdfHighlights)
+    .set(data)
+    .where(and(
+      eq(pdfHighlights.id, highlightId),
+      eq(pdfHighlights.userId, userId)
+    ));
+}
+
+export async function deletePdfHighlight(highlightId: number, userId: number) {
+  await db
+    .delete(pdfHighlights)
+    .where(and(
+      eq(pdfHighlights.id, highlightId),
+      eq(pdfHighlights.userId, userId)
+    ));
+}
+
+// ==================== PDF ANNOTATIONS ====================
+
+export async function createPdfAnnotation(data: {
+  userId: number;
+  pageNumber: number;
+  chapterId?: number;
+  highlightId?: number;
+  note: string;
+  contextText?: string;
+  xPosition?: number;
+  yPosition?: number;
+}) {
+  const result = await db.insert(pdfAnnotations).values({
+    userId: data.userId,
+    pageNumber: data.pageNumber,
+    chapterId: data.chapterId || null,
+    highlightId: data.highlightId || null,
+    note: data.note,
+    contextText: data.contextText || null,
+    xPosition: data.xPosition || null,
+    yPosition: data.yPosition || null,
+  });
+  
+  return result;
+}
+
+export async function listPdfAnnotations(userId: number, pageNumber?: number) {
+  const conditions = [eq(pdfAnnotations.userId, userId)];
+  
+  if (pageNumber !== undefined) {
+    conditions.push(eq(pdfAnnotations.pageNumber, pageNumber));
+  }
+  
+  return db
+    .select()
+    .from(pdfAnnotations)
+    .where(and(...conditions))
+    .orderBy(pdfAnnotations.pageNumber, pdfAnnotations.createdAt);
+}
+
+export async function updatePdfAnnotation(annotationId: number, userId: number, data: {
+  note?: string;
+}) {
+  await db
+    .update(pdfAnnotations)
+    .set({ ...data, updatedAt: new Date() })
+    .where(and(
+      eq(pdfAnnotations.id, annotationId),
+      eq(pdfAnnotations.userId, userId)
+    ));
+}
+
+export async function deletePdfAnnotation(annotationId: number, userId: number) {
+  await db
+    .delete(pdfAnnotations)
+    .where(and(
+      eq(pdfAnnotations.id, annotationId),
+      eq(pdfAnnotations.userId, userId)
+    ));
 }
 
 // ==================== VOICE CLONING ====================

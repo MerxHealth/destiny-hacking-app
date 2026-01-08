@@ -57,6 +57,13 @@
       "when": 1767651468362,
       "tag": "0007_tough_wallop",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1767900796141,
+      "tag": "0008_short_mentallo",
+      "breakpoints": true
     }
   ]
 }

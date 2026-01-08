@@ -1310,6 +1310,97 @@ Provide a brief Stoic strategist reflection (2-3 sentences) on the cause-effect 
     listBookmarks: protectedProcedure.query(async ({ ctx }) => {
       return db.listPdfBookmarks(ctx.user.id);
     }),
+
+    // Create highlight
+    createHighlight: protectedProcedure
+      .input(z.object({
+        pageNumber: z.number(),
+        chapterId: z.number().optional(),
+        selectedText: z.string(),
+        startOffset: z.number(),
+        endOffset: z.number(),
+        color: z.enum(["yellow", "green", "blue", "pink"]).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.createPdfHighlight({
+          userId: ctx.user.id,
+          ...input,
+        });
+      }),
+
+    // List highlights
+    listHighlights: protectedProcedure
+      .input(z.object({
+        pageNumber: z.number().optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        return db.listPdfHighlights(ctx.user.id, input.pageNumber);
+      }),
+
+    // Update highlight color
+    updateHighlight: protectedProcedure
+      .input(z.object({
+        highlightId: z.number(),
+        color: z.enum(["yellow", "green", "blue", "pink"]),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.updatePdfHighlight(input.highlightId, ctx.user.id, {
+          color: input.color,
+        });
+      }),
+
+    // Delete highlight
+    deleteHighlight: protectedProcedure
+      .input(z.object({ highlightId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        return db.deletePdfHighlight(input.highlightId, ctx.user.id);
+      }),
+
+    // Create annotation
+    createAnnotation: protectedProcedure
+      .input(z.object({
+        pageNumber: z.number(),
+        chapterId: z.number().optional(),
+        highlightId: z.number().optional(),
+        note: z.string(),
+        contextText: z.string().optional(),
+        xPosition: z.number().optional(),
+        yPosition: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.createPdfAnnotation({
+          userId: ctx.user.id,
+          ...input,
+        });
+      }),
+
+    // List annotations
+    listAnnotations: protectedProcedure
+      .input(z.object({
+        pageNumber: z.number().optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        return db.listPdfAnnotations(ctx.user.id, input.pageNumber);
+      }),
+
+    // Update annotation
+    updateAnnotation: protectedProcedure
+      .input(z.object({
+        annotationId: z.number(),
+        note: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.updatePdfAnnotation(input.annotationId, ctx.user.id, {
+          note: input.note,
+        });
+      }),
+
+    // Delete annotation
+    deleteAnnotation: protectedProcedure
+      .input(z.object({ annotationId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        return db.deletePdfAnnotation(input.annotationId, ctx.user.id);
+      }),
   }),
 
   // Voice Cloning (Admin/Author Only)

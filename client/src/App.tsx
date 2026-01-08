@@ -28,6 +28,7 @@ import { AudiobookGeneration } from "./pages/AudiobookGeneration";
 import { BatchAudiobookGeneration } from "./pages/BatchAudiobookGeneration";
 import { RecordVoice } from "./pages/RecordVoice";
 import { GenerateAudiobook } from "./pages/GenerateAudiobook";
+import { ProgressDashboard } from "./pages/ProgressDashboard";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 
 function Router() {
@@ -53,6 +54,7 @@ function Router() {
       <Route path={"/achievements"} component={Achievements} />
       <Route path={"/audiobook"} component={Audiobook} />
       <Route path={"/book"} component={Book} />
+      <Route path={"/progress"} component={ProgressDashboard} />
       <Route path={"/voice-cloning"} component={VoiceCloning} />
       <Route path={"/audiobook-generation"} component={AudiobookGeneration} />
       <Route path="/batch-audiobook-generation" component={BatchAudiobookGeneration} />

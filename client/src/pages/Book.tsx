@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Headphones, FileText, Download } from "lucide-react";
+import { BookOpen, Headphones, FileText, Download, Highlighter } from "lucide-react";
 import { Link } from "wouter";
 import { PDFViewer } from "@/components/PDFViewer";
+import { HighlightsSidebar } from "@/components/HighlightsSidebar";
 
 export function Book() {
   const [location] = useLocation();
@@ -16,6 +17,7 @@ export function Book() {
   
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showHighlights, setShowHighlights] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const { data: progress } = trpc.pdf.getProgress.useQuery();
@@ -81,16 +83,16 @@ export function Book() {
         <div className="flex gap-2">
           <Button variant="default" className="gap-2">
             <BookOpen className="h-4 w-4" />
-            Read
+            Read Book
           </Button>
-          <Button variant="outline" asChild className="gap-2">
+          <Button variant="outline" className="gap-2" asChild>
             <Link href={currentChapterNumber ? `/audiobook?chapter=${currentChapterNumber}` : "/audiobook"}>
               <Headphones className="h-4 w-4" />
               Listen
             </Link>
           </Button>
-          <Button variant="outline" asChild className="gap-2">
-            <Link href={currentChapterNumber ? `/modules/${currentChapterNumber}` : "/modules"}>
+          <Button variant="outline" className="gap-2" asChild>
+            <Link href="/modules">
               <FileText className="h-4 w-4" />
               Practice
             </Link>
@@ -101,9 +103,9 @@ export function Book() {
       {/* Reading Progress */}
       <Card>
         <CardHeader>
-          <CardTitle>Your Reading Progress</CardTitle>
+          <CardTitle>Reading Progress</CardTitle>
           <CardDescription>
-            Track your journey through the Destiny Hacking book
+            {currentChapter ? `Currently reading: Chapter ${currentChapter.chapterNumber} - ${currentChapter.title}` : 'Track your reading progress'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -136,31 +138,55 @@ export function Book() {
         </CardContent>
       </Card>
 
-      {/* PDF Viewer */}
-      <Card className="h-[800px]">
-        <CardContent className="p-0 h-full">
-          <PDFViewer
-            pdfUrl="/destiny-hacking-book.pdf"
-            initialPage={currentPage}
-            onPageChange={(page) => {
-              setCurrentPage(page);
-              
-              // Debounced auto-save (save after 2 seconds of no page changes)
-              if (saveTimeoutRef.current) {
-                clearTimeout(saveTimeoutRef.current);
-              }
-              
-              saveTimeoutRef.current = setTimeout(() => {
-                updateProgressMutation.mutate({
-                  currentPage: page,
-                  totalPages: totalPages,
-                });
-              }, 2000);
-            }}
-            className="h-full"
+      {/* PDF Viewer with Highlights */}
+      <div className="flex gap-4">
+        <Card className={`h-[800px] transition-all ${showHighlights ? 'flex-1' : 'w-full'}`}>
+          <CardContent className="p-0 h-full flex flex-col">
+            {/* Highlights Toggle */}
+            <div className="p-4 border-b">
+              <Button
+                variant={showHighlights ? "default" : "outline"}
+                onClick={() => setShowHighlights(!showHighlights)}
+                className="gap-2"
+              >
+                <Highlighter className="h-4 w-4" />
+                {showHighlights ? "Hide" : "Show"} Highlights
+              </Button>
+            </div>
+            
+            <div className="flex-1 overflow-hidden">
+              <PDFViewer
+                pdfUrl="/destiny-hacking-book.pdf"
+                initialPage={currentPage}
+                onPageChange={(page) => {
+                  setCurrentPage(page);
+                  
+                  // Debounced auto-save (save after 2 seconds of no page changes)
+                  if (saveTimeoutRef.current) {
+                    clearTimeout(saveTimeoutRef.current);
+                  }
+                  
+                  saveTimeoutRef.current = setTimeout(() => {
+                    updateProgressMutation.mutate({
+                      currentPage: page,
+                      totalPages: totalPages,
+                    });
+                  }, 2000);
+                }}
+                className="h-full"
+              />
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Highlights Sidebar */}
+        {showHighlights && (
+          <HighlightsSidebar 
+            pageNumber={currentPage}
+            onClose={() => setShowHighlights(false)}
           />
-        </CardContent>
-      </Card>
+        )}
+      </div>
 
       {/* Chapter Navigation */}
       {chapters && chapters.length > 0 && (

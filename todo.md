@@ -734,3 +734,38 @@
 - [ ] Create "Practice" button that links to corresponding module
 - [ ] Test complete user journey: audiobook → PDF → module
 - [ ] Save checkpoint with complete integration
+
+
+## Phase 30: Advanced Multi-Format Learning Features
+
+### PDF Highlighting & Annotations
+- [x] Add pdf_highlights table to database schema
+- [x] Add pdf_annotations table to database schema
+- [x] Create tRPC procedures for highlight CRUD operations
+- [x] Create tRPC procedures for annotation CRUD operations
+- [x] Build text selection handler in PDFViewer component
+- [x] Implement highlight color picker (yellow, green, blue, pink)
+- [x] Create annotation popup/modal for adding notes
+- [x] Display highlights as list in sidebar (simplified approach)
+- [x] Show annotations with highlighted text
+- [x] Add highlights sidebar panel
+- [x] Test highlighting and annotation workflows
+
+### Audio-PDF Sync Scrolling
+- [ ] Calculate page-to-timestamp mapping for each chapter
+- [ ] Add sync toggle button to audiobook player
+- [ ] Implement auto-scroll logic based on current audio timestamp
+- [ ] Create visual indicator showing current audio position in PDF
+- [ ] Add manual sync adjustment controls
+- [ ] Handle edge cases (page boundaries, chapter transitions)
+- [ ] Test sync accuracy across different chapters
+
+### Unified Progress Dashboard
+- [x] Create ProgressDashboard page component
+- [x] Build overall completion chart (pie or donut chart)
+- [x] Add format-specific progress bars (audiobook, PDF, modules)
+- [x] Add "Resume" buttons for each format with chapter context
+- [x] Display total time spent in each format
+- [x] Show completion milestones and achievements
+- [x] Add navigation link from home page
+- [x] Test dashboard data accuracy and performance
