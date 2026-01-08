@@ -1,0 +1,94 @@
+{
+  "query": "SELECT chapterNumber, title, SUBSTRING(audioUrl, 1, 80) as audioUrl, audioDuration FROM book_chapters ORDER BY chapterNumber LIMIT 14",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4S4NaSTm8gULMAn.ab4bddc10a61 --database fsRnWghWhaoD2r3KXXoRti --execute SELECT chapterNumber, title, SUBSTRING(audioUrl, 1, 80) as audioUrl, audioDuration FROM book_chapters ORDER BY chapterNumber LIMIT 14",
+  "rows": [
+    {
+      "chapterNumber": "1",
+      "title": "Test Chapter",
+      "audioUrl": "https://example.com/chapter1.mp3",
+      "audioDuration": "NULL"
+    },
+    {
+      "chapterNumber": "1",
+      "title": "The Divine Gift: The Awesome Power and Terrifying Responsibility of Free Will",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook",
+      "audioDuration": "973"
+    },
+    {
+      "chapterNumber": "2",
+      "title": "The Unbreakable Law of Your Reality",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook",
+      "audioDuration": "1036"
+    },
+    {
+      "chapterNumber": "3",
+      "title": "The Unfair Advantage: How to Find Meaning in a World of Unfairness",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook",
+      "audioDuration": "989"
+    },
+    {
+      "chapterNumber": "4",
+      "title": "The Gravity of Choice: Navigating the Roles of Abuser and Victim",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook",
+      "audioDuration": "1037"
+    },
+    {
+      "chapterNumber": "5",
+      "title": "The Crossroads of Choice: The Terrible Cost of Indecision",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook",
+      "audioDuration": "960"
+    },
+    {
+      "chapterNumber": "6",
+      "title": "The Phoenix Moment: Rising from the Ashes of Your Past",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook",
+      "audioDuration": "1075"
+    },
+    {
+      "chapterNumber": "7",
+      "title": "Marcus Aurelius and the Stoic Path to Inner Freedom",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook",
+      "audioDuration": "1166"
+    },
+    {
+      "chapterNumber": "8",
+      "title": "The Weight of Your Will: The Radical Power of Taking Responsibility",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook",
+      "audioDuration": "879"
+    },
+    {
+      "chapterNumber": "9",
+      "title": "The Alchemy of Will: Turning Suffering into Strength",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook",
+      "audioDuration": "969"
+    },
+    {
+      "chapterNumber": "10",
+      "title": "The Surfer and the Wave: The Dance of Free Will and Universal Laws",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook",
+      "audioDuration": "918"
+    },
+    {
+      "chapterNumber": "11",
+      "title": "The Paradox of Prayer: Does Asking for Help Undermine Free Will?",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook",
+      "audioDuration": "908"
+    },
+    {
+      "chapterNumber": "12",
+      "title": "The Myth of the Lone Genius: Why Your Will Needs a Tribe",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook",
+      "audioDuration": "895"
+    },
+    {
+      "chapterNumber": "13",
+      "title": "The Architect of Destiny: How Your Daily Choices Build Your Life",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook",
+      "audioDuration": "875"
+    }
+  ],
+  "messages": [],
+  "stdout": "chapterNumber\ttitle\taudioUrl\taudioDuration\n1\tTest Chapter\thttps://example.com/chapter1.mp3\tNULL\n1\tThe Divine Gift: The Awesome Power and Terrifying Responsibility of Free Will\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook\t973\n2\tThe Unbreakable Law of Your Reality\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook\t1036\n3\tThe Unfair Advantage: How to Find Meaning in a World of Unfairness\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook\t989\n4\tThe Gravity of Choice: Navigating the Roles of Abuser and Victim\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook\t1037\n5\tThe Crossroads of Choice: The Terrible Cost of Indecision\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook\t960\n6\tThe Phoenix Moment: Rising from the Ashes of Your Past\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook\t1075\n7\tMarcus Aurelius and the Stoic Path to Inner Freedom\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook\t1166\n8\tThe Weight of Your Will: The Radical Power of Taking Responsibility\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook\t879\n9\tThe Alchemy of Will: Turning Suffering into Strength\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook\t969\n10\tThe Surfer and the Wave: The Dance of Free Will and Universal Laws\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook\t918\n11\tThe Paradox of Prayer: Does Asking for Help Undermine Free Will?\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook\t908\n12\tThe Myth of the Lone Genius: Why Your Will Needs a Tribe\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook\t895\n13\tThe Architect of Destiny: How Your Daily Choices Build Your Life\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook\t875\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

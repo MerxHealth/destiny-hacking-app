@@ -1584,3 +1584,27 @@ export async function updateVoiceModelStatus(modelId: string, status: "pending" 
     .set({ status, updatedAt: new Date() })
     .where(eq(voiceModels.modelId, modelId));
 }
+
+
+export async function updateAudiobookChapter(
+  chapterId: number,
+  data: {
+    audioUrl?: string;
+    duration?: number;
+    title?: string;
+    description?: string;
+  }
+) {
+  await db
+    .update(bookChapters)
+    .set(data)
+    .where(eq(bookChapters.id, chapterId));
+  
+  const result = await db
+    .select()
+    .from(bookChapters)
+    .where(eq(bookChapters.id, chapterId))
+    .limit(1);
+  
+  return result[0];
+}

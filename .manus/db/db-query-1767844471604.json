@@ -1,0 +1,100 @@
+{
+  "query": "SELECT chapterNumber, CASE WHEN audioUrl LIKE '%fixed%' THEN 'FIXED' ELSE 'OLD' END as version, audioUrl FROM book_chapters ORDER BY chapterNumber",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4S4NaSTm8gULMAn.ab4bddc10a61 --database fsRnWghWhaoD2r3KXXoRti --execute SELECT chapterNumber, CASE WHEN audioUrl LIKE '%fixed%' THEN 'FIXED' ELSE 'OLD' END as version, audioUrl FROM book_chapters ORDER BY chapterNumber",
+  "rows": [
+    {
+      "chapterNumber": "1",
+      "version": "OLD",
+      "audioUrl": "https://example.com/chapter1.mp3"
+    },
+    {
+      "chapterNumber": "1",
+      "version": "FIXED",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-1-1767840431204.mp3"
+    },
+    {
+      "chapterNumber": "2",
+      "version": "FIXED",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-2-1767840618625.mp3"
+    },
+    {
+      "chapterNumber": "3",
+      "version": "FIXED",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-3-1767840809444.mp3"
+    },
+    {
+      "chapterNumber": "4",
+      "version": "FIXED",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-4-1767841022987.mp3"
+    },
+    {
+      "chapterNumber": "5",
+      "version": "FIXED",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-5-1767841265498.mp3"
+    },
+    {
+      "chapterNumber": "6",
+      "version": "FIXED",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-6-1767841500951.mp3"
+    },
+    {
+      "chapterNumber": "7",
+      "version": "FIXED",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-7-1767841797744.mp3"
+    },
+    {
+      "chapterNumber": "8",
+      "version": "FIXED",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-8-1767841969318.mp3"
+    },
+    {
+      "chapterNumber": "9",
+      "version": "FIXED",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-9-1767842198734.mp3"
+    },
+    {
+      "chapterNumber": "10",
+      "version": "FIXED",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-10-1767842386887.mp3"
+    },
+    {
+      "chapterNumber": "11",
+      "version": "FIXED",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-11-1767842572507.mp3"
+    },
+    {
+      "chapterNumber": "12",
+      "version": "FIXED",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-12-1767842749552.mp3"
+    },
+    {
+      "chapterNumber": "13",
+      "version": "FIXED",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-13-1767842899293.mp3"
+    },
+    {
+      "chapterNumber": "14",
+      "version": "OLD",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking/chapter-14-1767835639457.mp3"
+    },
+    {
+      "chapterNumber": "99",
+      "version": "OLD",
+      "audioUrl": "https://example.com/test-chapter.mp3"
+    },
+    {
+      "chapterNumber": "99",
+      "version": "OLD",
+      "audioUrl": "https://example.com/test-chapter.mp3"
+    },
+    {
+      "chapterNumber": "99",
+      "version": "OLD",
+      "audioUrl": "https://example.com/test-chapter.mp3"
+    }
+  ],
+  "messages": [],
+  "stdout": "chapterNumber\tversion\taudioUrl\n1\tOLD\thttps://example.com/chapter1.mp3\n1\tFIXED\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-1-1767840431204.mp3\n2\tFIXED\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-2-1767840618625.mp3\n3\tFIXED\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-3-1767840809444.mp3\n4\tFIXED\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-4-1767841022987.mp3\n5\tFIXED\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-5-1767841265498.mp3\n6\tFIXED\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-6-1767841500951.mp3\n7\tFIXED\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-7-1767841797744.mp3\n8\tFIXED\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-8-1767841969318.mp3\n9\tFIXED\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-9-1767842198734.mp3\n10\tFIXED\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-10-1767842386887.mp3\n11\tFIXED\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-11-1767842572507.mp3\n12\tFIXED\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-12-1767842749552.mp3\n13\tFIXED\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-13-1767842899293.mp3\n14\tOLD\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking/chapter-14-1767835639457.mp3\n99\tOLD\thttps://example.com/test-chapter.mp3\n99\tOLD\thttps://example.com/test-chapter.mp3\n99\tOLD\thttps://example.com/test-chapter.mp3\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}
