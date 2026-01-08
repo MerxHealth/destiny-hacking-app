@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
-import { eq, and, desc, sql, gte, or, lte } from "drizzle-orm";
+import { eq, and, desc, asc, sql, gte, or, lte } from "drizzle-orm";
 import { ENV } from "./_core/env";
 
 // Create database connection
@@ -22,6 +22,8 @@ import {
   pdfReadingProgress,
   pdfHighlights,
   pdfAnnotations,
+  flashcards,
+  flashcardReviews,
   voiceModels,
   type EmotionalAxis,
   type InsertEmotionalAxis,
@@ -1729,4 +1731,240 @@ export async function updateAudiobookChapter(
     .limit(1);
   
   return result[0];
+}
+
+
+// ============================================================================
+// FLASHCARD FUNCTIONS
+// ============================================================================
+
+/**
+ * SM-2 Spaced Repetition Algorithm
+ * Calculates next review date and ease factor based on quality rating (0-5)
+ * 
+ * Quality ratings:
+ * 0 - Complete blackout
+ * 1 - Incorrect response, correct answer remembered
+ * 2 - Incorrect response, correct answer seemed easy to recall
+ * 3 - Correct response, but required significant difficulty
+ * 4 - Correct response, after some hesitation
+ * 5 - Perfect response
+ */
+export function calculateSM2(
+  quality: number, // 0-5
+  easeFactor: number, // Current ease factor
+  interval: number, // Current interval in days
+  repetitions: number // Number of successful reviews
+): { easeFactor: number; interval: number; repetitions: number } {
+  // Update ease factor
+  let newEaseFactor = easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+  
+  // Ease factor should not go below 1.3
+  if (newEaseFactor < 1.3) {
+    newEaseFactor = 1.3;
+  }
+  
+  // Calculate new interval and repetitions
+  let newInterval: number;
+  let newRepetitions: number;
+  
+  if (quality < 3) {
+    // Failed - reset
+    newRepetitions = 0;
+    newInterval = 1;
+  } else {
+    // Passed
+    newRepetitions = repetitions + 1;
+    
+    if (newRepetitions === 1) {
+      newInterval = 1;
+    } else if (newRepetitions === 2) {
+      newInterval = 6;
+    } else {
+      newInterval = Math.round(interval * newEaseFactor);
+    }
+  }
+  
+  return {
+    easeFactor: newEaseFactor,
+    interval: newInterval,
+    repetitions: newRepetitions,
+  };
+}
+
+export async function createFlashcard(
+  userId: number,
+  data: {
+    front: string;
+    back: string;
+    highlightId?: number;
+    chapterId?: number;
+    pageNumber?: number;
+    deckName?: string;
+    tags?: string[];
+  }
+) {
+  const nextReviewDate = new Date();
+  nextReviewDate.setDate(nextReviewDate.getDate() + 1); // Review tomorrow
+  
+  const result = await db
+    .insert(flashcards)
+    .values({
+      userId,
+      front: data.front,
+      back: data.back,
+      highlightId: data.highlightId,
+      chapterId: data.chapterId,
+      pageNumber: data.pageNumber,
+      deckName: data.deckName,
+      tags: data.tags ? JSON.stringify(data.tags) : null,
+      nextReviewDate,
+      easeFactor: 2.5,
+      interval: 1,
+      repetitions: 0,
+    });
+  
+  return result;
+}
+
+export async function getFlashcard(flashcardId: number) {
+  const result = await db
+    .select()
+    .from(flashcards)
+    .where(eq(flashcards.id, flashcardId))
+    .limit(1);
+  
+  return result[0];
+}
+
+export async function listUserFlashcards(userId: number, deckName?: string) {
+  const conditions = [eq(flashcards.userId, userId)];
+  
+  if (deckName) {
+    conditions.push(eq(flashcards.deckName, deckName));
+  }
+  
+  const result = await db
+    .select()
+    .from(flashcards)
+    .where(and(...conditions))
+    .orderBy(desc(flashcards.createdAt));
+  
+  return result;
+}
+
+export async function getDueFlashcards(userId: number, limit: number = 20) {
+  const now = new Date();
+  
+  const result = await db
+    .select()
+    .from(flashcards)
+    .where(
+      and(
+        eq(flashcards.userId, userId),
+        lte(flashcards.nextReviewDate, now)
+      )
+    )
+    .orderBy(asc(flashcards.nextReviewDate))
+    .limit(limit);
+  
+  return result;
+}
+
+export async function reviewFlashcard(
+  userId: number,
+  flashcardId: number,
+  quality: number, // 0-5
+  timeSpentSeconds?: number
+) {
+  // Get current flashcard state
+  const flashcard = await getFlashcard(flashcardId);
+  if (!flashcard || flashcard.userId !== userId) {
+    throw new Error("Flashcard not found");
+  }
+  
+  // Calculate new values using SM-2
+  const { easeFactor, interval, repetitions } = calculateSM2(
+    quality,
+    flashcard.easeFactor,
+    flashcard.interval,
+    flashcard.repetitions
+  );
+  
+  // Calculate next review date
+  const nextReviewDate = new Date();
+  nextReviewDate.setDate(nextReviewDate.getDate() + interval);
+  
+  // Update flashcard
+  await db
+    .update(flashcards)
+    .set({
+      easeFactor,
+      interval,
+      repetitions,
+      nextReviewDate,
+      lastReviewedAt: new Date(),
+    })
+    .where(eq(flashcards.id, flashcardId));
+  
+  // Record review
+  await db.insert(flashcardReviews).values({
+    userId,
+    flashcardId,
+    quality,
+    timeSpentSeconds,
+    previousEaseFactor: flashcard.easeFactor,
+    previousInterval: flashcard.interval,
+  });
+  
+  return { easeFactor, interval, repetitions, nextReviewDate };
+}
+
+export async function updateFlashcard(
+  flashcardId: number,
+  data: {
+    front?: string;
+    back?: string;
+    deckName?: string;
+    tags?: string[];
+  }
+) {
+  const updateData: any = {};
+  
+  if (data.front !== undefined) updateData.front = data.front;
+  if (data.back !== undefined) updateData.back = data.back;
+  if (data.deckName !== undefined) updateData.deckName = data.deckName;
+  if (data.tags !== undefined) updateData.tags = JSON.stringify(data.tags);
+  
+  await db
+    .update(flashcards)
+    .set(updateData)
+    .where(eq(flashcards.id, flashcardId));
+  
+  return await getFlashcard(flashcardId);
+}
+
+export async function deleteFlashcard(flashcardId: number) {
+  await db.delete(flashcards).where(eq(flashcards.id, flashcardId));
+}
+
+export async function getFlashcardStats(userId: number) {
+  const allCards = await listUserFlashcards(userId);
+  const dueCards = await getDueFlashcards(userId, 1000);
+  
+  const totalCards = allCards.length;
+  const dueCount = dueCards.length;
+  const reviewedCount = allCards.filter(c => c.lastReviewedAt).length;
+  
+  // Calculate average ease factor
+  const avgEaseFactor = totalCards > 0
+    ? allCards.reduce((sum, c) => sum + c.easeFactor, 0) / totalCards
+    : 2.5;
+  
+  return {
+    totalCards,
+    dueCount,
+    reviewedCount,
+    avgEaseFactor,
+  };
 }

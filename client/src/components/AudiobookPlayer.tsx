@@ -14,7 +14,8 @@ import {
   Bookmark,
   Clock,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  BookOpen
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -31,6 +32,7 @@ export function AudiobookPlayer({ chapterId, onChapterChange }: AudiobookPlayerP
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
+  const [syncMode, setSyncMode] = useState(false);
 
   // Fetch chapter data
   const { data: chapter } = trpc.audiobook.getChapter.useQuery({ chapterId });
@@ -97,6 +99,17 @@ export function AudiobookPlayer({ chapterId, onChapterChange }: AudiobookPlayerP
   const handleTimeUpdate = () => {
     if (audioRef.current) {
       setCurrentTime(audioRef.current.currentTime);
+      
+      // Broadcast position for sync mode
+      if (syncMode && chapter) {
+        localStorage.setItem('audiobook-sync', JSON.stringify({
+          chapterId: chapter.id,
+          chapterNumber: chapter.chapterNumber,
+          currentTime: audioRef.current.currentTime,
+          duration: duration,
+          timestamp: Date.now()
+        }));
+      }
     }
   };
 
@@ -311,6 +324,28 @@ export function AudiobookPlayer({ chapterId, onChapterChange }: AudiobookPlayerP
           >
             <Bookmark className="h-4 w-4" />
             Bookmark
+          </Button>
+          
+          {/* Sync Mode */}
+          <Button
+            variant={syncMode ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              if (!syncMode && chapter) {
+                // Open PDF in sync mode
+                const pdfUrl = `/book?chapter=${chapter.chapterNumber}&sync=true`;
+                window.open(pdfUrl, 'pdf-sync', 'width=1200,height=800');
+                setSyncMode(true);
+                toast.success("Sync mode enabled - PDF will follow audio");
+              } else {
+                setSyncMode(false);
+                toast.info("Sync mode disabled");
+              }
+            }}
+            className="gap-2"
+          >
+            <BookOpen className="h-4 w-4" />
+            {syncMode ? "Syncing" : "Follow Along"}
           </Button>
         </div>
       </CardContent>

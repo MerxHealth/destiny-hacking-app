@@ -64,6 +64,13 @@
       "when": 1767900796141,
       "tag": "0008_short_mentallo",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1767906763650,
+      "tag": "0009_flawless_firelord",
+      "breakpoints": true
     }
   ]
 }

@@ -414,6 +414,9 @@ export default function NewHome() {
             <Link href="/progress">📊 Progress Dashboard</Link>
           </Button>
           <Button asChild variant="ghost" size="sm">
+            <Link href="/flashcards">🧠 Flashcard Review</Link>
+          </Button>
+          <Button asChild variant="ghost" size="sm">
             <Link href="/modules">📚 Learning Path</Link>
           </Button>
           <Button asChild variant="ghost" size="sm">

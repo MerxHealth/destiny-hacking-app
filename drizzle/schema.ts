@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, json, index, unique, decimal } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, json, index, unique, decimal, double } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
 
 /**
@@ -803,8 +803,69 @@ export const pdfHighlights = mysqlTable("pdf_highlights", {
   
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, (table) => ({
-  userIdIdx: index("pdf_highlights_user_id_idx").on(table.userId),
-  pageNumberIdx: index("pdf_highlights_page_number_idx").on(table.pageNumber),
+  userIdIdx: index("pdf_annotations_user_id_idx").on(table.userId),
+  pageNumberIdx: index("pdf_annotations_page_number_idx").on(table.pageNumber),
+}));
+
+/**
+ * Flashcards for spaced repetition learning from highlights and notes.
+ * Uses SM-2 algorithm for optimal review scheduling.
+ */
+export const flashcards = mysqlTable("flashcards", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  
+  // Card content
+  front: text("front").notNull(), // Question or prompt
+  back: text("back").notNull(), // Answer or explanation
+  
+  // Source tracking
+  highlightId: int("highlightId"), // Optional link to highlight
+  chapterId: int("chapterId"), // Optional link to chapter
+  pageNumber: int("pageNumber"), // Optional page reference
+  
+  // SM-2 algorithm fields
+  easeFactor: double("easeFactor").default(2.5).notNull(), // Difficulty rating (1.3 - 2.5+)
+  interval: int("interval").default(1).notNull(), // Days until next review
+  repetitions: int("repetitions").default(0).notNull(), // Successful reviews count
+  
+  // Review scheduling
+  nextReviewDate: timestamp("nextReviewDate").notNull(),
+  lastReviewedAt: timestamp("lastReviewedAt"),
+  
+  // Metadata
+  tags: json("tags"), // Array of tags for organization
+  deckName: varchar("deckName", { length: 255 }), // Optional deck grouping
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("flashcards_user_id_idx").on(table.userId),
+  nextReviewIdx: index("flashcards_next_review_idx").on(table.userId, table.nextReviewDate),
+  deckNameIdx: index("flashcards_deck_name_idx").on(table.userId, table.deckName),
+}));
+
+/**
+ * Review history for tracking flashcard performance over time.
+ */
+export const flashcardReviews = mysqlTable("flashcard_reviews", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  flashcardId: int("flashcardId").notNull(),
+  
+  // Review result
+  quality: int("quality").notNull(), // 0-5 rating (SM-2: 0=fail, 3+=pass)
+  timeSpentSeconds: int("timeSpentSeconds"), // Time to answer
+  
+  // State before review
+  previousEaseFactor: double("previousEaseFactor").notNull(),
+  previousInterval: int("previousInterval").notNull(),
+  
+  reviewedAt: timestamp("reviewedAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("flashcard_reviews_user_id_idx").on(table.userId),
+  flashcardIdIdx: index("flashcard_reviews_flashcard_id_idx").on(table.flashcardId),
+  reviewedAtIdx: index("flashcard_reviews_reviewed_at_idx").on(table.reviewedAt),
 }));
 
 export type PdfHighlight = typeof pdfHighlights.$inferSelect;

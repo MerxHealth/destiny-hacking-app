@@ -18,6 +18,7 @@ export function Book() {
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [showHighlights, setShowHighlights] = useState(false);
+  const [syncMode, setSyncMode] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const { data: progress } = trpc.pdf.getProgress.useQuery();
@@ -46,7 +47,50 @@ export function Book() {
         setSelectedChapter(chapter.id);
       }
     }
+    
+    // Check if sync mode is enabled
+    const syncParam = searchParams.get('sync');
+    if (syncParam === 'true') {
+      setSyncMode(true);
+    }
   }, [chapterParam, chapters]);
+  
+  // Listen for audio sync updates
+  useEffect(() => {
+    if (!syncMode || !chapters) return;
+    
+    const checkSync = () => {
+      const syncData = localStorage.getItem('audiobook-sync');
+      if (!syncData) return;
+      
+      try {
+        const { chapterNumber, currentTime, duration } = JSON.parse(syncData);
+        
+        // Find the chapter
+        const chapter = chapters.find((ch: any) => ch.chapterNumber === chapterNumber);
+        if (!chapter || !chapter.pdfStartPage || !chapter.pdfEndPage) return;
+        
+        // Calculate progress within chapter (0-1)
+        const chapterProgress = duration > 0 ? currentTime / duration : 0;
+        
+        // Calculate page within chapter
+        const pagesInChapter = chapter.pdfEndPage - chapter.pdfStartPage + 1;
+        const pageOffset = Math.floor(chapterProgress * pagesInChapter);
+        const targetPage = chapter.pdfStartPage + pageOffset;
+        
+        // Update page if different
+        if (targetPage !== currentPage && targetPage >= chapter.pdfStartPage && targetPage <= chapter.pdfEndPage) {
+          setCurrentPage(targetPage);
+        }
+      } catch (e) {
+        console.error('Sync error:', e);
+      }
+    };
+    
+    // Check every second
+    const interval = setInterval(checkSync, 1000);
+    return () => clearInterval(interval);
+  }, [syncMode, chapters, currentPage]);
   
   // Find current chapter based on page number
   const currentChapter = chapters?.find((ch: any) => 

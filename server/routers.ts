@@ -1555,9 +1555,90 @@ Provide a brief Stoic strategist reflection (2-3 sentences) on the cause-effect 
       if (insightCount >= 1) await db.unlockBadge(userId, "first_insight") && newlyUnlocked.push("first_insight");
       if (insightCount >= 10) await db.unlockBadge(userId, "insights_10") && newlyUnlocked.push("insights_10");
 
-      return { newlyUnlocked };
+       return { newlyUnlocked };
     }),
   }),
+  
+  // Flashcards for spaced repetition
+  flashcards: router({
+    // Create flashcard
+    create: protectedProcedure
+      .input(z.object({
+        front: z.string(),
+        back: z.string(),
+        highlightId: z.number().optional(),
+        chapterId: z.number().optional(),
+        pageNumber: z.number().optional(),
+        deckName: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.createFlashcard(ctx.user.id, input);
+      }),
+    
+    // Get flashcard by ID
+    getById: protectedProcedure
+      .input(z.object({ flashcardId: z.number() }))
+      .query(async ({ input }) => {
+        return db.getFlashcard(input.flashcardId);
+      }),
+    
+    // List user's flashcards
+    list: protectedProcedure
+      .input(z.object({ deckName: z.string().optional() }).optional())
+      .query(async ({ ctx, input }) => {
+        return db.listUserFlashcards(ctx.user.id, input?.deckName);
+      }),
+    
+    // Get due flashcards for review
+    getDue: protectedProcedure
+      .input(z.object({ limit: z.number().default(20) }).optional())
+      .query(async ({ ctx, input }) => {
+        return db.getDueFlashcards(ctx.user.id, input?.limit || 20);
+      }),
+    
+    // Review flashcard (submit answer)
+    review: protectedProcedure
+      .input(z.object({
+        flashcardId: z.number(),
+        quality: z.number().min(0).max(5), // SM-2 quality rating
+        timeSpentSeconds: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.reviewFlashcard(
+          ctx.user.id,
+          input.flashcardId,
+          input.quality,
+          input.timeSpentSeconds
+        );
+      }),
+    
+    // Update flashcard
+    update: protectedProcedure
+      .input(z.object({
+        flashcardId: z.number(),
+        front: z.string().optional(),
+        back: z.string().optional(),
+        deckName: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return db.updateFlashcard(input.flashcardId, input);
+      }),
+    
+    // Delete flashcard
+    delete: protectedProcedure
+      .input(z.object({ flashcardId: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteFlashcard(input.flashcardId);
+        return { success: true };
+      }),
+    
+    // Get flashcard statistics
+    getStats: protectedProcedure
+      .query(async ({ ctx }) => {
+        return db.getFlashcardStats(ctx.user.id);
+      }),
+  }),
 });
-
 export type AppRouter = typeof appRouter;
