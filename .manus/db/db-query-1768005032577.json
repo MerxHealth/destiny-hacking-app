@@ -1,0 +1,100 @@
+{
+  "query": "SELECT id, chapterNumber, title, audioUrl FROM book_chapters ORDER BY chapterNumber;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4S4NaSTm8gULMAn.ab4bddc10a61 --database fsRnWghWhaoD2r3KXXoRti --execute SELECT id, chapterNumber, title, audioUrl FROM book_chapters ORDER BY chapterNumber;",
+  "rows": [
+    {
+      "id": "1",
+      "chapterNumber": "1",
+      "title": "Test Chapter",
+      "audioUrl": "https://example.com/chapter1.mp3"
+    },
+    {
+      "id": "30001",
+      "chapterNumber": "1",
+      "title": "The Divine Gift: The Awesome Power and Terrifying Responsibility of Free Will",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-1-1767878606824.mp3"
+    },
+    {
+      "id": "30002",
+      "chapterNumber": "2",
+      "title": "The Unbreakable Law of Your Reality",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-2-1767980884308.mp3"
+    },
+    {
+      "id": "30003",
+      "chapterNumber": "3",
+      "title": "The Unfair Advantage: How to Find Meaning in a World of Unfairness",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-3-1767879017302.mp3"
+    },
+    {
+      "id": "30004",
+      "chapterNumber": "4",
+      "title": "The Gravity of Choice: Navigating the Roles of Abuser and Victim",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-4-1767879289532.mp3"
+    },
+    {
+      "id": "30005",
+      "chapterNumber": "5",
+      "title": "The Crossroads of Choice: The Terrible Cost of Indecision",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-5-1767879496717.mp3"
+    },
+    {
+      "id": "30006",
+      "chapterNumber": "6",
+      "title": "The Phoenix Moment: Rising from the Ashes of Your Past",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-6-1767879726148.mp3"
+    },
+    {
+      "id": "30007",
+      "chapterNumber": "7",
+      "title": "Marcus Aurelius and the Stoic Path to Inner Freedom",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-7-1767879980455.mp3"
+    },
+    {
+      "id": "30008",
+      "chapterNumber": "8",
+      "title": "The Weight of Your Will: The Radical Power of Taking Responsibility",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-8-1767880204579.mp3"
+    },
+    {
+      "id": "30009",
+      "chapterNumber": "9",
+      "title": "The Alchemy of Will: Turning Suffering into Strength",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-9-1767880396416.mp3"
+    },
+    {
+      "id": "30010",
+      "chapterNumber": "10",
+      "title": "The Surfer and the Wave: The Dance of Free Will and Universal Laws",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-10-1767880618100.mp3"
+    },
+    {
+      "id": "30011",
+      "chapterNumber": "11",
+      "title": "The Paradox of Prayer: Does Asking for Help Undermine Free Will?",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-11-1767880794919.mp3"
+    },
+    {
+      "id": "30012",
+      "chapterNumber": "12",
+      "title": "The Myth of the Lone Genius: Why Your Will Needs a Tribe",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-12-1767881020965.mp3"
+    },
+    {
+      "id": "30013",
+      "chapterNumber": "13",
+      "title": "The Architect of Destiny: How Your Daily Choices Build Your Life",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-13-1767881205564.mp3"
+    },
+    {
+      "id": "30014",
+      "chapterNumber": "14",
+      "title": "Your Invictus Moment: The Captain of Your Soul",
+      "audioUrl": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-14-1767881841507.mp3"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tchapterNumber\ttitle\taudioUrl\n1\t1\tTest Chapter\thttps://example.com/chapter1.mp3\n30001\t1\tThe Divine Gift: The Awesome Power and Terrifying Responsibility of Free Will\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-1-1767878606824.mp3\n30002\t2\tThe Unbreakable Law of Your Reality\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-2-1767980884308.mp3\n30003\t3\tThe Unfair Advantage: How to Find Meaning in a World of Unfairness\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-3-1767879017302.mp3\n30004\t4\tThe Gravity of Choice: Navigating the Roles of Abuser and Victim\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-4-1767879289532.mp3\n30005\t5\tThe Crossroads of Choice: The Terrible Cost of Indecision\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-5-1767879496717.mp3\n30006\t6\tThe Phoenix Moment: Rising from the Ashes of Your Past\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-6-1767879726148.mp3\n30007\t7\tMarcus Aurelius and the Stoic Path to Inner Freedom\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-7-1767879980455.mp3\n30008\t8\tThe Weight of Your Will: The Radical Power of Taking Responsibility\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-8-1767880204579.mp3\n30009\t9\tThe Alchemy of Will: Turning Suffering into Strength\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-9-1767880396416.mp3\n30010\t10\tThe Surfer and the Wave: The Dance of Free Will and Universal Laws\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-10-1767880618100.mp3\n30011\t11\tThe Paradox of Prayer: Does Asking for Help Undermine Free Will?\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-11-1767880794919.mp3\n30012\t12\tThe Myth of the Lone Genius: Why Your Will Needs a Tribe\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-12-1767881020965.mp3\n30013\t13\tThe Architect of Destiny: How Your Daily Choices Build Your Life\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-13-1767881205564.mp3\n30014\t14\tYour Invictus Moment: The Captain of Your Soul\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobooks/destiny-hacking-fixed/chapter-14-1767881841507.mp3\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

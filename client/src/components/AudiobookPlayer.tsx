@@ -15,7 +15,9 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
-  BookOpen
+  BookOpen,
+  Timer,
+  X
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -33,6 +35,8 @@ export function AudiobookPlayer({ chapterId, onChapterChange }: AudiobookPlayerP
   const [isMuted, setIsMuted] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
   const [syncMode, setSyncMode] = useState(false);
+  const [sleepTimer, setSleepTimer] = useState<number | null>(null); // minutes
+  const [sleepTimerRemaining, setSleepTimerRemaining] = useState<number>(0); // seconds
 
   // Fetch chapter data
   const { data: chapter } = trpc.audiobook.getChapter.useQuery({ chapterId });
@@ -84,6 +88,29 @@ export function AudiobookPlayer({ chapterId, onChapterChange }: AudiobookPlayerP
 
     return () => clearInterval(interval);
   }, [isPlaying, chapterId, playbackSpeed]);
+
+  // Sleep timer countdown
+  useEffect(() => {
+    if (sleepTimer === null) return;
+
+    const interval = setInterval(() => {
+      setSleepTimerRemaining((prev) => {
+        if (prev <= 1) {
+          // Timer expired
+          if (audioRef.current && isPlaying) {
+            audioRef.current.pause();
+            setIsPlaying(false);
+          }
+          setSleepTimer(null);
+          toast.info("Sleep timer expired - playback paused");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [sleepTimer, isPlaying]);
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -165,6 +192,24 @@ export function AudiobookPlayer({ chapterId, onChapterChange }: AudiobookPlayerP
     const currentIndex = speeds.indexOf(playbackSpeed);
     const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
     setPlaybackSpeed(nextSpeed);
+  };
+
+  const setSleepTimerMinutes = (minutes: number) => {
+    setSleepTimer(minutes);
+    setSleepTimerRemaining(minutes * 60);
+    toast.success(`Sleep timer set for ${minutes} minutes`);
+  };
+
+  const cancelSleepTimer = () => {
+    setSleepTimer(null);
+    setSleepTimerRemaining(0);
+    toast.info("Sleep timer cancelled");
+  };
+
+  const formatTimerRemaining = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const formatTime = (seconds: number) => {
@@ -347,6 +392,67 @@ export function AudiobookPlayer({ chapterId, onChapterChange }: AudiobookPlayerP
             <BookOpen className="h-4 w-4" />
             {syncMode ? "Syncing" : "Follow Along"}
           </Button>
+        </div>
+
+        {/* Sleep Timer */}
+        <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+          <div className="flex items-center gap-2">
+            <Timer className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Sleep Timer</span>
+          </div>
+          
+          {sleepTimer === null ? (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSleepTimerMinutes(5)}
+              >
+                5m
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSleepTimerMinutes(10)}
+              >
+                10m
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSleepTimerMinutes(15)}
+              >
+                15m
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSleepTimerMinutes(30)}
+              >
+                30m
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSleepTimerMinutes(60)}
+              >
+                60m
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Badge variant="secondary" className="text-base font-mono">
+                {formatTimerRemaining(sleepTimerRemaining)}
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={cancelSleepTimer}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
