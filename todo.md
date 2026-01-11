@@ -889,3 +889,39 @@
 - [x] Implement auto-pause when timer expires
 - [x] Add notification when timer expires
 - [x] Test sleep timer functionality (verified in browser)
+
+
+## Phase 35: Chatterbox TTS Integration & Voice Cloning
+
+### Chatterbox Setup
+- [x] Research Chatterbox deployment options (local, Modal, Hugging Face)
+- [x] Choose best deployment method for audiobook generation (local installation)
+- [x] Install Chatterbox TTS in sandbox (v0.1.6 with CUDA)
+- [x] Test basic text-to-speech generation
+- [x] Verify audio quality and performance
+
+### Voice Cloning System
+- [x] Voice sample upload interface already exists (VoiceCloning.tsx)
+- [x] Voice sample storage to S3 already implemented
+- [x] Voice cloning with reference audio (Chatterbox integration module created)
+- [x] Voice profile management database schema updated
+- [ ] Record 10+ second voice sample
+- [ ] Test voice clone quality with sample text
+
+### Audiobook Regeneration
+- [x] Create Chatterbox-based audiobook generation script (regenerate-audiobook-chatterbox.ts)
+- [x] Implement sentence-aware chunking for Chatterbox
+- [x] Add progress tracking for regeneration
+- [x] Implement WAV concatenation for seamless audio
+- [x] Integrate S3 upload for generated audio
+- [x] Update database with new audio URLs
+- [x] Create comprehensive usage guide (CHATTERBOX_AUDIOBOOK_GUIDE.md)
+- [ ] Regenerate Chapter 1 with voice clone (test)
+- [ ] Regenerate all 14 chapters with voice clone
+- [ ] Verify all audio files are correct
+
+### Quality Assurance
+- [ ] Test regenerated audio for repeating words
+- [ ] Verify voice consistency across chapters
+- [ ] Check audio file sizes and durations
+- [ ] Test playback in audiobook player

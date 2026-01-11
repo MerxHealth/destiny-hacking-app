@@ -85,6 +85,13 @@
       "when": 1767944540901,
       "tag": "0011_last_betty_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1768154717931,
+      "tag": "0012_worried_rocket_raccoon",
+      "breakpoints": true
     }
   ]
 }

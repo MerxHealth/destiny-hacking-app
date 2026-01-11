@@ -782,12 +782,13 @@ export const voiceModels = mysqlTable("voice_models", {
   userId: int("userId").notNull(), // Should be owner/admin user ID
   
   // Voice model details
-  modelId: varchar("modelId", { length: 255 }).notNull(), // ElevenLabs voice ID
+  modelId: varchar("modelId", { length: 255 }).notNull(), // Unique identifier for this voice
   modelName: varchar("modelName", { length: 255 }).notNull(),
-  sampleAudioUrl: text("sampleAudioUrl"), // S3 URL to sample recording
+  sampleAudioUrl: text("sampleAudioUrl"), // S3 URL to reference audio (10+ seconds)
+  provider: varchar("provider", { length: 50 }).default("chatterbox").notNull(), // "chatterbox" or "elevenlabs"
   
   // Status
-  status: mysqlEnum("status", ["pending", "training", "ready", "failed"]).default("ready").notNull(),
+  status: mysqlEnum("status", ["pending", "ready", "failed"]).default("ready").notNull(),
   isPrimary: boolean("isPrimary").default(false).notNull(), // Mark the primary voice for audiobook
   
   createdAt: timestamp("createdAt").defaultNow().notNull(),

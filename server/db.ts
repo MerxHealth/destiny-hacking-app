@@ -1702,7 +1702,7 @@ export async function getPrimaryVoiceModel() {
   return result[0] || null;
 }
 
-export async function updateVoiceModelStatus(modelId: string, status: "pending" | "training" | "ready" | "failed") {
+export async function updateVoiceModelStatus(modelId: string, status: "pending" | "ready" | "failed") {
   await db
     .update(voiceModels)
     .set({ status, updatedAt: new Date() })
