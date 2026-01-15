@@ -925,3 +925,13 @@
 - [x] Verify voice consistency across chapters
 - [x] Check audio file sizes and durations
 - [x] Test playback in audiobook player
+
+
+## Audiobook with Voice Cloning (Phase 30-31)
+- [x] Clone voice using ElevenLabs
+- [x] Regenerate English chapters 1-11 with cloned voice
+- [x] Upload chapters 1-11 to S3 and update database
+- [ ] Complete English chapters 12-14 (blocked by API restrictions)
+- [x] Translate all 14 chapters to Portuguese
+- [ ] Generate Portuguese audiobook (all 14 chapters)
+- [ ] Add language switching to audiobook player

@@ -65,7 +65,7 @@ sys.stdout.buffer.write(base64.b64decode(result["audio_b64"]))
 }
 
 // Split text into sentence-aware chunks
-function chunkText(text: string, maxChunkSize: number = 4000): string[] {
+function chunkText(text: string, maxChunkSize: number = 600): string[] {
   const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
   const chunks: string[] = [];
   let currentChunk = "";
