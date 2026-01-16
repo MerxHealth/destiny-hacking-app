@@ -680,7 +680,8 @@ export const bookChapters = mysqlTable("book_chapters", {
   moduleId: int("moduleId"), // Links to bookModules.id
   
   // Audio details
-  audioUrl: text("audioUrl"), // S3 URL to audio file
+  audioUrl: text("audioUrl"), // S3 URL to English audio file
+  audioUrlPt: text("audioUrlPt"), // S3 URL to Portuguese audio file
   audioDuration: int("audioDuration"), // Duration in seconds
   audioGenerated: boolean("audioGenerated").default(false).notNull(),
   
