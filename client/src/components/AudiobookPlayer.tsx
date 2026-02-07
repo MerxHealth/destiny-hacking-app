@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,11 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange }: Audiob
   const [sleepTimer, setSleepTimer] = useState<number | null>(null); // minutes
   const [sleepTimerRemaining, setSleepTimerRemaining] = useState<number>(0); // seconds
 
+  // Track whether we've already restored position for this chapter+language combo
+  // This prevents the progress query from repeatedly resetting currentTime during playback
+  const hasRestoredPosition = useRef(false);
+  const currentChapterLanguageKey = useRef("");
+
   // Fetch chapter data
   const { data: chapter } = trpc.audiobook.getChapter.useQuery({ chapterId });
   const { data: progress } = trpc.audiobook.getProgress.useQuery({ chapterId });
@@ -52,12 +57,8 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange }: Audiob
       : (chapter as any).audioUrl
     : null;
 
-  // Update progress mutation
-  const updateProgress = trpc.audiobook.updateProgress.useMutation({
-    onSuccess: () => {
-      utils.audiobook.getProgress.invalidate({ chapterId });
-    },
-  });
+  // Update progress mutation - don't invalidate the query to avoid re-triggering position restore
+  const updateProgress = trpc.audiobook.updateProgress.useMutation();
 
   // Create bookmark mutation
   const createBookmark = trpc.audiobook.createBookmark.useMutation({
@@ -66,31 +67,51 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange }: Audiob
     },
   });
 
-  // Load saved position when chapter loads
+  // Reset the restore flag when chapter or language changes
   useEffect(() => {
-    if (progress && audioRef.current) {
-      audioRef.current.currentTime = progress.currentPosition || 0;
-      setPlaybackSpeed(parseFloat(progress.playbackSpeed as any) || 1.0);
+    const key = `${chapterId}-${language}`;
+    if (currentChapterLanguageKey.current !== key) {
+      hasRestoredPosition.current = false;
+      currentChapterLanguageKey.current = key;
     }
-  }, [progress, chapterId]);
+  }, [chapterId, language]);
+
+  // Load saved position ONLY ONCE when chapter first loads
+  // This runs when progress data arrives, but only restores position once per chapter+language
+  useEffect(() => {
+    if (progress && audioRef.current && !hasRestoredPosition.current) {
+      const savedPosition = progress.currentPosition || 0;
+      // Only restore if we have a meaningful saved position
+      if (savedPosition > 0) {
+        audioRef.current.currentTime = savedPosition;
+        setCurrentTime(savedPosition);
+      }
+      setPlaybackSpeed(parseFloat(progress.playbackSpeed as any) || 1.0);
+      hasRestoredPosition.current = true;
+    }
+  }, [progress]);
 
   // Handle language change - pause and reset when language switches
   useEffect(() => {
     if (audioRef.current) {
-      const wasPlaying = isPlaying;
+      const wasPlaying = !audioRef.current.paused;
       audioRef.current.pause();
       setIsPlaying(false);
       setCurrentTime(0);
       setDuration(0);
+      
       // After the new source loads, resume if was playing
-      const handleCanPlay = () => {
-        if (wasPlaying) {
-          audioRef.current?.play();
-          setIsPlaying(true);
-        }
-        audioRef.current?.removeEventListener('canplay', handleCanPlay);
-      };
-      audioRef.current.addEventListener('canplay', handleCanPlay);
+      if (wasPlaying) {
+        const handleCanPlay = () => {
+          audioRef.current?.play().then(() => {
+            setIsPlaying(true);
+          }).catch(() => {
+            // Autoplay might be blocked
+          });
+          audioRef.current?.removeEventListener('canplay', handleCanPlay);
+        };
+        audioRef.current.addEventListener('canplay', handleCanPlay);
+      }
     }
   }, [language]);
 
@@ -101,21 +122,26 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange }: Audiob
     }
   }, [playbackSpeed]);
 
-  // Save progress periodically
+  // Save progress periodically - uses a ref to avoid stale closures
+  const isPlayingRef = useRef(isPlaying);
+  isPlayingRef.current = isPlaying;
+  const playbackSpeedRef = useRef(playbackSpeed);
+  playbackSpeedRef.current = playbackSpeed;
+
   useEffect(() => {
     const interval = setInterval(() => {
-      if (isPlaying && audioRef.current) {
+      if (isPlayingRef.current && audioRef.current) {
         const position = Math.floor(audioRef.current.currentTime);
         updateProgress.mutate({
           chapterId,
           currentPosition: position,
-          playbackSpeed,
+          playbackSpeed: playbackSpeedRef.current,
         });
       }
     }, 10000); // Save every 10 seconds
 
     return () => clearInterval(interval);
-  }, [isPlaying, chapterId, playbackSpeed]);
+  }, [chapterId]);
 
   // Sleep timer countdown
   useEffect(() => {
@@ -125,7 +151,7 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange }: Audiob
       setSleepTimerRemaining((prev) => {
         if (prev <= 1) {
           // Timer expired
-          if (audioRef.current && isPlaying) {
+          if (audioRef.current && !audioRef.current.paused) {
             audioRef.current.pause();
             setIsPlaying(false);
           }
@@ -138,20 +164,24 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange }: Audiob
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [sleepTimer, isPlaying]);
+  }, [sleepTimer]);
 
-  const togglePlay = () => {
+  const togglePlay = useCallback(() => {
     if (!audioRef.current) return;
 
-    if (isPlaying) {
-      audioRef.current.pause();
+    if (audioRef.current.paused) {
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch(() => {
+        toast.error("Unable to play audio");
+      });
     } else {
-      audioRef.current.play();
+      audioRef.current.pause();
+      setIsPlaying(false);
     }
-    setIsPlaying(!isPlaying);
-  };
+  }, []);
 
-  const handleTimeUpdate = () => {
+  const handleTimeUpdate = useCallback(() => {
     if (audioRef.current) {
       setCurrentTime(audioRef.current.currentTime);
       
@@ -166,22 +196,24 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange }: Audiob
         }));
       }
     }
-  };
+  }, [syncMode, chapter, duration]);
 
-  const handleLoadedMetadata = () => {
+  const handleLoadedMetadata = useCallback(() => {
     if (audioRef.current) {
       setDuration(audioRef.current.duration);
+      // Apply playback speed to newly loaded audio
+      audioRef.current.playbackRate = playbackSpeedRef.current;
     }
-  };
+  }, []);
 
-  const handleSeek = (value: number[]) => {
+  const handleSeek = useCallback((value: number[]) => {
     if (audioRef.current) {
       audioRef.current.currentTime = value[0];
       setCurrentTime(value[0]);
     }
-  };
+  }, []);
 
-  const handleVolumeChange = (value: number[]) => {
+  const handleVolumeChange = useCallback((value: number[]) => {
     const newVolume = value[0];
     setVolume(newVolume);
     if (audioRef.current) {
@@ -189,50 +221,50 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange }: Audiob
     }
     if (newVolume === 0) {
       setIsMuted(true);
-    } else if (isMuted) {
+    } else {
       setIsMuted(false);
     }
-  };
+  }, []);
 
-  const toggleMute = () => {
+  const toggleMute = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.muted = !isMuted;
       setIsMuted(!isMuted);
     }
-  };
+  }, [isMuted]);
 
-  const skip = (seconds: number) => {
+  const skip = useCallback((seconds: number) => {
     if (audioRef.current) {
       audioRef.current.currentTime += seconds;
     }
-  };
+  }, []);
 
-  const handleAddBookmark = () => {
+  const handleAddBookmark = useCallback(() => {
     createBookmark.mutate({
       chapterId,
       position: Math.floor(currentTime),
       title: `Bookmark at ${formatTime(currentTime)}`,
     });
-  };
+  }, [chapterId, currentTime]);
 
-  const cycleSpeed = () => {
+  const cycleSpeed = useCallback(() => {
     const speeds = [0.75, 1.0, 1.25, 1.5, 2.0];
     const currentIndex = speeds.indexOf(playbackSpeed);
     const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
     setPlaybackSpeed(nextSpeed);
-  };
+  }, [playbackSpeed]);
 
-  const setSleepTimerMinutes = (minutes: number) => {
+  const setSleepTimerMinutes = useCallback((minutes: number) => {
     setSleepTimer(minutes);
     setSleepTimerRemaining(minutes * 60);
     toast.success(`Sleep timer set for ${minutes} minutes`);
-  };
+  }, []);
 
-  const cancelSleepTimer = () => {
+  const cancelSleepTimer = useCallback(() => {
     setSleepTimer(null);
     setSleepTimerRemaining(0);
     toast.info("Sleep timer cancelled");
-  };
+  }, []);
 
   const formatTimerRemaining = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -240,11 +272,15 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange }: Audiob
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
+  const handleEnded = useCallback(() => {
+    setIsPlaying(false);
+    updateProgress.mutate({
+      chapterId,
+      currentPosition: 0,
+      playbackSpeed: playbackSpeedRef.current,
+      completed: true,
+    });
+  }, [chapterId]);
 
   if (!chapter) {
     return (
@@ -280,15 +316,9 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange }: Audiob
           src={audioUrl || undefined}
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}
-          onEnded={() => {
-            setIsPlaying(false);
-            updateProgress.mutate({
-              chapterId,
-              currentPosition: 0,
-              playbackSpeed,
-              completed: true,
-            });
-          }}
+          onEnded={handleEnded}
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
         />
 
         {/* Progress Bar */}
@@ -465,4 +495,10 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange }: Audiob
       </CardContent>
     </Card>
   );
+}
+
+function formatTime(seconds: number) {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
 }

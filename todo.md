@@ -1014,3 +1014,12 @@
 - [x] Ensure player remembers language preference (localStorage persistence)
 - [x] Test switching between English and Portuguese (verified: EN=chapter_01_elevenlabs.mp3, PT=chapter_01_pt.mp3)
 - [x] Save checkpoint
+
+
+## Phase 36: Fix Portuguese Audio Repetition Bug
+- [x] Investigate AudiobookPlayer component for audio repeat/loop bugs
+- [x] Check if language switching causes audio source conflicts
+- [x] Check if useEffect dependencies cause audio element to re-create mid-playback
+- [x] Fix the root cause of word repetition (progress save → invalidate → re-fetch → position restore loop)
+- [x] Test Portuguese audio playback after fix (12-second monitoring: 0 jumps, steady 1.00s deltas)
+- [x] Save checkpoint
