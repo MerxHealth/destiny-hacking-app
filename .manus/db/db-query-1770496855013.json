@@ -1,0 +1,157 @@
+{
+  "query": "SELECT id, chapterNumber, title, LEFT(audioUrl, 100) as audioUrlShort, audioDuration FROM book_chapters ORDER BY chapterNumber;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4S4NaSTm8gULMAn.ab4bddc10a61 --database fsRnWghWhaoD2r3KXXoRti --execute SELECT id, chapterNumber, title, LEFT(audioUrl, 100) as audioUrlShort, audioDuration FROM book_chapters ORDER BY chapterNumber;",
+  "rows": [
+    {
+      "id": "60001",
+      "chapterNumber": "1",
+      "title": "Test Chapter",
+      "audioUrlShort": "https://example.com/chapter1.mp3",
+      "audioDuration": "600"
+    },
+    {
+      "id": "30001",
+      "chapterNumber": "1",
+      "title": "The Divine Gift: The Awesome Power and Terrifying Responsibility of Free Will",
+      "audioUrlShort": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_01_elevenla",
+      "audioDuration": "973"
+    },
+    {
+      "id": "1",
+      "chapterNumber": "1",
+      "title": "Test Chapter",
+      "audioUrlShort": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_01_elevenla",
+      "audioDuration": "NULL"
+    },
+    {
+      "id": "60005",
+      "chapterNumber": "1",
+      "title": "Test Chapter",
+      "audioUrlShort": "https://example.com/chapter1.mp3",
+      "audioDuration": "600"
+    },
+    {
+      "id": "60003",
+      "chapterNumber": "1",
+      "title": "Test Chapter",
+      "audioUrlShort": "https://example.com/chapter1.mp3",
+      "audioDuration": "600"
+    },
+    {
+      "id": "30002",
+      "chapterNumber": "2",
+      "title": "The Unbreakable Law of Your Reality",
+      "audioUrlShort": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_02_elevenla",
+      "audioDuration": "1036"
+    },
+    {
+      "id": "30003",
+      "chapterNumber": "3",
+      "title": "The Unfair Advantage: How to Find Meaning in a World of Unfairness",
+      "audioUrlShort": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_03_elevenla",
+      "audioDuration": "989"
+    },
+    {
+      "id": "30004",
+      "chapterNumber": "4",
+      "title": "The Gravity of Choice: Navigating the Roles of Abuser and Victim",
+      "audioUrlShort": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_04_elevenla",
+      "audioDuration": "1037"
+    },
+    {
+      "id": "30005",
+      "chapterNumber": "5",
+      "title": "The Crossroads of Choice: The Terrible Cost of Indecision",
+      "audioUrlShort": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_05_elevenla",
+      "audioDuration": "960"
+    },
+    {
+      "id": "30006",
+      "chapterNumber": "6",
+      "title": "The Phoenix Moment: Rising from the Ashes of Your Past",
+      "audioUrlShort": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_06_elevenla",
+      "audioDuration": "1075"
+    },
+    {
+      "id": "30007",
+      "chapterNumber": "7",
+      "title": "Marcus Aurelius and the Stoic Path to Inner Freedom",
+      "audioUrlShort": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_07_elevenla",
+      "audioDuration": "1166"
+    },
+    {
+      "id": "30008",
+      "chapterNumber": "8",
+      "title": "The Weight of Your Will: The Radical Power of Taking Responsibility",
+      "audioUrlShort": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_08_elevenla",
+      "audioDuration": "879"
+    },
+    {
+      "id": "30009",
+      "chapterNumber": "9",
+      "title": "The Alchemy of Will: Turning Suffering into Strength",
+      "audioUrlShort": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_09_elevenla",
+      "audioDuration": "969"
+    },
+    {
+      "id": "30010",
+      "chapterNumber": "10",
+      "title": "The Surfer and the Wave: The Dance of Free Will and Universal Laws",
+      "audioUrlShort": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_10_elevenla",
+      "audioDuration": "918"
+    },
+    {
+      "id": "30011",
+      "chapterNumber": "11",
+      "title": "The Paradox of Prayer: Does Asking for Help Undermine Free Will?",
+      "audioUrlShort": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_11_elevenla",
+      "audioDuration": "908"
+    },
+    {
+      "id": "30012",
+      "chapterNumber": "12",
+      "title": "The Myth of the Lone Genius: Why Your Will Needs a Tribe",
+      "audioUrlShort": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_12_elevenla",
+      "audioDuration": "895"
+    },
+    {
+      "id": "30013",
+      "chapterNumber": "13",
+      "title": "The Architect of Destiny: How Your Daily Choices Build Your Life",
+      "audioUrlShort": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_13_elevenla",
+      "audioDuration": "875"
+    },
+    {
+      "id": "30014",
+      "chapterNumber": "14",
+      "title": "Your Invictus Moment: The Captain of Your Soul",
+      "audioUrlShort": "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_14_elevenla",
+      "audioDuration": "2809"
+    },
+    {
+      "id": "60002",
+      "chapterNumber": "99",
+      "title": "Test Chapter",
+      "audioUrlShort": "https://example.com/test-chapter.mp3",
+      "audioDuration": "300"
+    },
+    {
+      "id": "60004",
+      "chapterNumber": "99",
+      "title": "Test Chapter",
+      "audioUrlShort": "https://example.com/test-chapter.mp3",
+      "audioDuration": "300"
+    },
+    {
+      "id": "60006",
+      "chapterNumber": "99",
+      "title": "Test Chapter",
+      "audioUrlShort": "https://example.com/test-chapter.mp3",
+      "audioDuration": "300"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tchapterNumber\ttitle\taudioUrlShort\taudioDuration\n60001\t1\tTest Chapter\thttps://example.com/chapter1.mp3\t600\n30001\t1\tThe Divine Gift: The Awesome Power and Terrifying Responsibility of Free Will\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_01_elevenla\t973\n1\t1\tTest Chapter\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_01_elevenla\tNULL\n60005\t1\tTest Chapter\thttps://example.com/chapter1.mp3\t600\n60003\t1\tTest Chapter\thttps://example.com/chapter1.mp3\t600\n30002\t2\tThe Unbreakable Law of Your Reality\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_02_elevenla\t1036\n30003\t3\tThe Unfair Advantage: How to Find Meaning in a World of Unfairness\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_03_elevenla\t989\n30004\t4\tThe Gravity of Choice: Navigating the Roles of Abuser and Victim\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_04_elevenla\t1037\n30005\t5\tThe Crossroads of Choice: The Terrible Cost of Indecision\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_05_elevenla\t960\n30006\t6\tThe Phoenix Moment: Rising from the Ashes of Your Past\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_06_elevenla\t1075\n30007\t7\tMarcus Aurelius and the Stoic Path to Inner Freedom\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_07_elevenla\t1166\n30008\t8\tThe Weight of Your Will: The Radical Power of Taking Responsibility\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_08_elevenla\t879\n30009\t9\tThe Alchemy of Will: Turning Suffering into Strength\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_09_elevenla\t969\n30010\t10\tThe Surfer and the Wave: The Dance of Free Will and Universal Laws\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_10_elevenla\t918\n30011\t11\tThe Paradox of Prayer: Does Asking for Help Undermine Free Will?\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_11_elevenla\t908\n30012\t12\tThe Myth of the Lone Genius: Why Your Will Needs a Tribe\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_12_elevenla\t895\n30013\t13\tThe Architect of Destiny: How Your Daily Choices Build Your Life\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_13_elevenla\t875\n30014\t14\tYour Invictus Moment: The Captain of Your Soul\thttps://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/audiobook/chapter_14_elevenla\t2809\n60002\t99\tTest Chapter\thttps://example.com/test-chapter.mp3\t300\n60004\t99\tTest Chapter\thttps://example.com/test-chapter.mp3\t300\n60006\t99\tTest Chapter\thttps://example.com/test-chapter.mp3\t300\n",
+  "stderr": "",
+  "execution_time_ms": 130
+}
