@@ -1,0 +1,22 @@
+{
+  "query": "SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'book_chapters' AND COLUMN_NAME LIKE '%pdf%' OR COLUMN_NAME LIKE '%book%' ORDER BY ORDINAL_POSITION;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4S4NaSTm8gULMAn.ab4bddc10a61 --database fsRnWghWhaoD2r3KXXoRti --execute SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'book_chapters' AND COLUMN_NAME LIKE '%pdf%' OR COLUMN_NAME LIKE '%book%' ORDER BY ORDINAL_POSITION;",
+  "rows": [
+    {
+      "COLUMN_NAME": "bookmarkType",
+      "DATA_TYPE": "enum"
+    },
+    {
+      "COLUMN_NAME": "pdfStartPage",
+      "DATA_TYPE": "int"
+    },
+    {
+      "COLUMN_NAME": "pdfEndPage",
+      "DATA_TYPE": "int"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_NAME\tDATA_TYPE\nbookmarkType\tenum\npdfStartPage\tint\npdfEndPage\tint\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

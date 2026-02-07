@@ -1,15 +1,30 @@
 import { useState, useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Headphones, FileText, Download, Highlighter } from "lucide-react";
+import { Headphones, Highlighter } from "lucide-react";
 import { Link } from "wouter";
 import { PDFViewer } from "@/components/PDFViewer";
 import { HighlightsSidebar } from "@/components/HighlightsSidebar";
 import { PageHeader } from "@/components/PageHeader";
+import { getChapterTitle } from "@shared/chapterTranslations";
+
+type BookLanguage = "en" | "pt";
+
+const BOOK_LANGUAGE_KEY = "book-language";
+
+const PDF_URLS: Record<BookLanguage, string> = {
+  en: "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/pdfs/destiny-hacking-book.pdf",
+  pt: "https://d2xsxph8kpxj0f.cloudfront.net/111904132/fsRnWghWhaoD2r3KXXoRti/pdfs/destiny-hacking-book-pt.pdf",
+};
+
+const TOTAL_PAGES: Record<BookLanguage, number> = {
+  en: 87,
+  pt: 65,
+};
 
 export function Book() {
   const [location] = useLocation();
@@ -20,17 +35,28 @@ export function Book() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showHighlights, setShowHighlights] = useState(false);
   const [syncMode, setSyncMode] = useState(false);
+  const [language, setLanguage] = useState<BookLanguage>(() => {
+    const saved = localStorage.getItem(BOOK_LANGUAGE_KEY);
+    return (saved === "pt" ? "pt" : "en") as BookLanguage;
+  });
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const { data: progress } = trpc.pdf.getProgress.useQuery();
   const { data: chapters } = trpc.pdf.listChapters.useQuery();
   const updateProgressMutation = trpc.pdf.updateProgress.useMutation();
 
-  const totalChapters = chapters?.length || 0;
-  const totalPages = 87; // Actual PDF page count
+  const totalPages = TOTAL_PAGES[language];
   const displayPage = progress?.currentPage || currentPage;
   const percentComplete = (displayPage / totalPages) * 100;
   
+  // Persist language preference
+  const handleLanguageChange = (lang: BookLanguage) => {
+    setLanguage(lang);
+    localStorage.setItem(BOOK_LANGUAGE_KEY, lang);
+    // Reset to page 1 when switching language since page numbers may differ
+    setCurrentPage(1);
+  };
+
   // Initialize page from progress or chapter parameter
   useEffect(() => {
     if (progress?.currentPage && currentPage === 1) {
@@ -49,7 +75,6 @@ export function Book() {
       }
     }
     
-    // Check if sync mode is enabled
     const syncParam = searchParams.get('sync');
     if (syncParam === 'true') {
       setSyncMode(true);
@@ -66,20 +91,14 @@ export function Book() {
       
       try {
         const { chapterNumber, currentTime, duration } = JSON.parse(syncData);
-        
-        // Find the chapter
         const chapter = chapters.find((ch: any) => ch.chapterNumber === chapterNumber);
         if (!chapter || !chapter.pdfStartPage || !chapter.pdfEndPage) return;
         
-        // Calculate progress within chapter (0-1)
         const chapterProgress = duration > 0 ? currentTime / duration : 0;
-        
-        // Calculate page within chapter
         const pagesInChapter = chapter.pdfEndPage - chapter.pdfStartPage + 1;
         const pageOffset = Math.floor(chapterProgress * pagesInChapter);
         const targetPage = chapter.pdfStartPage + pageOffset;
         
-        // Update page if different
         if (targetPage !== currentPage && targetPage >= chapter.pdfStartPage && targetPage <= chapter.pdfEndPage) {
           setCurrentPage(targetPage);
         }
@@ -88,7 +107,6 @@ export function Book() {
       }
     };
     
-    // Check every second
     const interval = setInterval(checkSync, 1000);
     return () => clearInterval(interval);
   }, [syncMode, chapters, currentPage]);
@@ -111,8 +129,11 @@ export function Book() {
   return (
     <div className="min-h-screen bg-background">
       <PageHeader
-        title="Read Book"
-        subtitle={currentChapter ? `Ch. ${currentChapter.chapterNumber} - ${currentChapter.title}` : `Page ${currentPage} of ${totalPages}`}
+        title={language === "pt" ? "Ler Livro" : "Read Book"}
+        subtitle={currentChapter 
+          ? `Ch. ${currentChapter.chapterNumber} - ${getChapterTitle(currentChapter.chapterNumber, language, currentChapter.title)}` 
+          : `${language === "pt" ? "Página" : "Page"} ${currentPage} ${language === "pt" ? "de" : "of"} ${totalPages}`
+        }
         showBack
         rightAction={
           <div className="flex gap-1.5">
@@ -135,6 +156,34 @@ export function Book() {
 
       <div className="px-4 py-3 space-y-3">
 
+      {/* Language Switcher */}
+      <div className="flex items-center justify-center">
+        <div className="inline-flex items-center bg-muted/60 rounded-full p-1 gap-0.5">
+          <button
+            onClick={() => handleLanguageChange("en")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+              language === "en"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <span className="text-base leading-none">🇬🇧</span>
+            <span>English</span>
+          </button>
+          <button
+            onClick={() => handleLanguageChange("pt")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+              language === "pt"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <span className="text-base leading-none">🇧🇷</span>
+            <span>Português</span>
+          </button>
+        </div>
+      </div>
+
       {/* Compact Reading Progress */}
       <div className="flex items-center gap-3">
         <div className="flex-1">
@@ -145,10 +194,10 @@ export function Book() {
 
       {/* PDF Viewer - Full height mobile-first */}
       <div className="relative">
-        <Card className="h-[calc(100vh-220px)] border-border/50">
+        <Card className="h-[calc(100vh-260px)] border-border/50 overflow-hidden">
           <CardContent className="p-0 h-full">
             <PDFViewer
-              pdfUrl="/destiny-hacking-book.pdf"
+              pdfUrl={PDF_URLS[language]}
               initialPage={currentPage}
               onPageChange={(page) => {
                 setCurrentPage(page);
@@ -171,13 +220,13 @@ export function Book() {
         {showHighlights && (
           <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm">
             <PageHeader
-              title="Highlights"
-              subtitle={`Page ${currentPage}`}
+              title={language === "pt" ? "Destaques" : "Highlights"}
+              subtitle={`${language === "pt" ? "Página" : "Page"} ${currentPage}`}
               showBack
               backPath="#"
               rightAction={
                 <Button variant="ghost" size="sm" onClick={() => setShowHighlights(false)}>
-                  Done
+                  {language === "pt" ? "Feito" : "Done"}
                 </Button>
               }
             />
@@ -194,7 +243,9 @@ export function Book() {
       {/* Compact Chapter Navigation */}
       {chapters && chapters.length > 0 && (
         <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Chapters</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            {language === "pt" ? "Capítulos" : "Chapters"}
+          </h2>
           <div className="space-y-1">
             {chapters.map((chapter: any) => (
               <Card 
@@ -211,7 +262,9 @@ export function Book() {
                     <span className="text-xs font-bold">{chapter.chapterNumber}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{chapter.title}</p>
+                    <p className="text-sm font-medium truncate">
+                      {getChapterTitle(chapter.chapterNumber, language, chapter.title)}
+                    </p>
                     {chapter.pdfStartPage && (
                       <p className="text-[10px] text-muted-foreground">p. {chapter.pdfStartPage}-{chapter.pdfEndPage}</p>
                     )}

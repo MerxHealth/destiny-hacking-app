@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { 
   ChevronLeft, 
@@ -30,12 +29,35 @@ export function PDFViewer({ pdfUrl, initialPage = 1, onPageChange, className }: 
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(initialPage);
   const [scale, setScale] = useState(1.0);
+  const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Sync pageNumber when initialPage changes (e.g. language switch resets to page 1)
+  useEffect(() => {
+    setPageNumber(initialPage);
+  }, [initialPage]);
+
+  // Measure container width for auto-fit
+  useEffect(() => {
+    const measure = () => {
+      if (containerRef.current) {
+        // Subtract padding (16px each side)
+        const width = containerRef.current.clientWidth - 16;
+        setContainerWidth(width > 0 ? width : null);
+      }
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
     setIsLoading(false);
-    toast.success(`PDF loaded: ${numPages} pages`);
   };
 
   const onDocumentLoadError = (error: Error) => {
@@ -67,124 +89,122 @@ export function PDFViewer({ pdfUrl, initialPage = 1, onPageChange, className }: 
     }
   };
 
-  const zoomIn = () => {
-    setScale(prev => Math.min(prev + 0.2, 3.0));
-  };
+  const zoomIn = () => setScale(prev => Math.min(prev + 0.25, 3.0));
+  const zoomOut = () => setScale(prev => Math.max(prev - 0.25, 0.5));
+  const resetZoom = () => setScale(1.0);
 
-  const zoomOut = () => {
-    setScale(prev => Math.max(prev - 0.2, 0.5));
-  };
-
-  const resetZoom = () => {
-    setScale(1.0);
-  };
+  // Calculate the effective width: container width * scale
+  const effectiveWidth = containerWidth ? containerWidth * scale : undefined;
 
   return (
     <div className={`flex flex-col h-full ${className}`}>
-      {/* Controls */}
-      <Card className="p-4 mb-4">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          {/* Page Navigation */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={goToPrevPage}
-              disabled={pageNumber <= 1 || isLoading}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
+      {/* Compact Controls Bar */}
+      <div className="flex items-center justify-between gap-1 px-2 py-2 border-b border-border/50 bg-card">
+        {/* Page Navigation */}
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={goToPrevPage}
+            disabled={pageNumber <= 1 || isLoading}
+            className="h-8 w-8"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
 
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                min={1}
-                max={numPages || 1}
-                value={pageNumber}
-                onChange={(e) => goToPage(parseInt(e.target.value) || 1)}
-                className="w-16 text-center"
-                disabled={isLoading}
-              />
-              <span className="text-sm text-muted-foreground">
-                / {numPages || "?"}
-              </span>
-            </div>
-
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={goToNextPage}
-              disabled={!numPages || pageNumber >= numPages || isLoading}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Zoom Controls */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={zoomOut}
-              disabled={scale <= 0.5 || isLoading}
-            >
-              <ZoomOut className="h-4 w-4" />
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={resetZoom}
+          <div className="flex items-center gap-1">
+            <Input
+              type="number"
+              min={1}
+              max={numPages || 1}
+              value={pageNumber}
+              onChange={(e) => goToPage(parseInt(e.target.value) || 1)}
+              className="w-12 h-8 text-center text-xs px-1"
               disabled={isLoading}
-              className="min-w-20"
-            >
-              {Math.round(scale * 100)}%
-            </Button>
-
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={zoomIn}
-              disabled={scale >= 3.0 || isLoading}
-            >
-              <ZoomIn className="h-4 w-4" />
-            </Button>
+            />
+            <span className="text-xs text-muted-foreground">
+              / {numPages || "?"}
+            </span>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => window.open(pdfUrl, "_blank")}
-              title="Open in new tab"
-            >
-              <Maximize className="h-4 w-4" />
-            </Button>
-
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => {
-                const link = document.createElement("a");
-                link.href = pdfUrl;
-                link.download = "destiny-hacking-book.pdf";
-                link.click();
-              }}
-              title="Download PDF"
-            >
-              <Download className="h-4 w-4" />
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={goToNextPage}
+            disabled={!numPages || pageNumber >= numPages || isLoading}
+            className="h-8 w-8"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
-      </Card>
 
-      {/* PDF Document */}
-      <div className="flex-1 overflow-auto bg-muted/30 rounded-lg p-4">
+        {/* Zoom Controls */}
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={zoomOut}
+            disabled={scale <= 0.5 || isLoading}
+            className="h-8 w-8"
+          >
+            <ZoomOut className="h-3.5 w-3.5" />
+          </Button>
+
+          <button
+            onClick={resetZoom}
+            disabled={isLoading}
+            className="text-xs text-muted-foreground min-w-[40px] text-center hover:text-foreground transition-colors"
+          >
+            {Math.round(scale * 100)}%
+          </button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={zoomIn}
+            disabled={scale >= 3.0 || isLoading}
+            className="h-8 w-8"
+          >
+            <ZoomIn className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => window.open(pdfUrl, "_blank")}
+            title="Fullscreen"
+            className="h-8 w-8"
+          >
+            <Maximize className="h-3.5 w-3.5" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              const link = document.createElement("a");
+              link.href = pdfUrl;
+              link.download = pdfUrl.includes("-pt") ? "destiny-hacking-book-pt.pdf" : "destiny-hacking-book.pdf";
+              link.click();
+            }}
+            title="Download PDF"
+            className="h-8 w-8"
+          >
+            <Download className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
+
+      {/* PDF Document - auto-fit width */}
+      <div ref={containerRef} className="flex-1 overflow-auto bg-muted/20 p-2">
         <div className="flex justify-center">
           {isLoading && (
             <div className="flex flex-col items-center gap-4 py-12">
-              <Loader2 className="h-12 w-12 animate-spin text-primary" />
-              <p className="text-muted-foreground">Loading PDF...</p>
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">Loading PDF...</p>
             </div>
           )}
 
@@ -204,10 +224,10 @@ export function PDFViewer({ pdfUrl, initialPage = 1, onPageChange, className }: 
           >
             <Page
               pageNumber={pageNumber}
-              scale={scale}
+              width={effectiveWidth}
               renderTextLayer={true}
               renderAnnotationLayer={true}
-              className="shadow-lg"
+              className="shadow-lg rounded-sm"
             />
           </Document>
         </div>

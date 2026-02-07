@@ -1036,3 +1036,17 @@
 - [x] Add theme toggle button accessible from the app (More page header + Settings section)
 - [x] Test all three fixes on mobile (all verified working)
 - [x] Save checkpoint
+
+
+## Phase 38: Book Page - PDF Fitting & Portuguese Version
+- [x] Fix PDF text not fitting on mobile (auto-fit width using container measurement)
+- [x] Investigate PDF viewer component for mobile width handling (was using scale=1.0 instead of width)
+- [x] Check database for Portuguese PDF URL (no DB column needed - using CDN URLs directly)
+- [x] Add English/Portuguese language switcher to Book page (matching audiobook style)
+- [x] Upload both PDFs to S3 CDN and remove from public folder
+- [x] Add translated chapter titles and page headers for Portuguese
+- [x] Test PDF displays correctly on mobile after fix (text auto-fits, no cutoff)
+- [x] Portuguese PDF loads correctly (65 pages, all chapter titles translated)
+- [x] Language switcher works (header, subtitle, chapters all translate)
+- [x] PDFs uploaded to app storage CloudFront with CORS, removed from public folder
+- [x] Save checkpoint
