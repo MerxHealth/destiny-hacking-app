@@ -1262,6 +1262,53 @@ Provide a brief Stoic strategist reflection (2-3 sentences) on the cause-effect 
       .query(async ({ ctx, input }) => {
         return db.listAudiobookBookmarks(ctx.user.id, input.chapterId);
       }),
+
+    // Submit chapter feedback
+    submitFeedback: protectedProcedure
+      .input(z.object({
+        chapterNumber: z.number().min(1).max(14),
+        language: z.enum(["en", "pt"]),
+        issueType: z.enum(["audio_quality", "text_error", "translation_issue", "other"]),
+        description: z.string().min(10).max(1000),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const feedback = await db.submitChapterFeedback({
+          userId: ctx.user.id,
+          chapterNumber: input.chapterNumber,
+          language: input.language,
+          issueType: input.issueType,
+          description: input.description,
+        });
+
+        // Notify owner about the feedback
+        const { notifyOwner } = await import("./_core/notification");
+        const issueTypeLabels = {
+          audio_quality: "Audio Quality",
+          text_error: "Text Error",
+          translation_issue: "Translation Issue",
+          other: "Other",
+        };
+        
+        await notifyOwner({
+          title: `Chapter ${input.chapterNumber} Feedback: ${issueTypeLabels[input.issueType]}`,
+          content: `User ${ctx.user.name || ctx.user.email || 'Anonymous'} reported an issue:\n\nLanguage: ${input.language.toUpperCase()}\nIssue Type: ${issueTypeLabels[input.issueType]}\nDescription: ${input.description}`,
+        });
+
+        return feedback;
+      }),
+
+    // Get all feedback (admin only)
+    listFeedback: protectedProcedure
+      .input(z.object({
+        chapterNumber: z.number().min(1).max(14).optional(),
+        status: z.enum(["pending", "reviewed", "resolved"]).optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
+        }
+        return db.listChapterFeedback(input.chapterNumber, input.status);
+      }),
   }),
 
   // PDF Book

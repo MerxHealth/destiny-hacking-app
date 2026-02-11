@@ -700,6 +700,40 @@ export type BookChapter = typeof bookChapters.$inferSelect;
 export type InsertBookChapter = typeof bookChapters.$inferInsert;
 
 /**
+ * Chapter Feedback allows users to report issues with audiobook chapters.
+ * This includes audio quality problems, text errors, translation issues, etc.
+ */
+export const chapterFeedback = mysqlTable("chapter_feedback", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  chapterNumber: int("chapterNumber").notNull(),
+  
+  // Feedback details
+  language: mysqlEnum("language", ["en", "pt"]).notNull(),
+  issueType: mysqlEnum("issueType", [
+    "audio_quality",
+    "text_error",
+    "translation_issue",
+    "other"
+  ]).notNull(),
+  description: text("description").notNull(),
+  
+  // Status tracking
+  status: mysqlEnum("status", ["pending", "reviewed", "resolved"]).default("pending").notNull(),
+  adminNotes: text("adminNotes"),
+  resolvedAt: timestamp("resolvedAt"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("chapter_feedback_user_id_idx").on(table.userId),
+  chapterNumberIdx: index("chapter_feedback_chapter_number_idx").on(table.chapterNumber),
+  statusIdx: index("chapter_feedback_status_idx").on(table.status),
+}));
+
+export type ChapterFeedback = typeof chapterFeedback.$inferSelect;
+export type InsertChapterFeedback = typeof chapterFeedback.$inferInsert;
+
+/**
  * Audiobook Progress tracks user listening progress for each chapter.
  */
 export const audiobookProgress = mysqlTable("audiobook_progress", {

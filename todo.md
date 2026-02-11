@@ -1088,3 +1088,20 @@
 - [x] Update database with new audioUrlPt
 - [x] Test Chapter 14 PT audio playback (player loads successfully, ready for user testing)
 - [ ] Save checkpoint
+
+## Phase 42: Add User Feedback Mechanism for Chapters
+- [x] Design feedback data model (chapter_feedback table)
+- [x] Create database schema with fields: id, userId, chapterNumber, language, issueType, description, status, createdAt
+- [x] Push database schema changes (table already exists from previous session)
+- [x] Create tRPC procedure: submitFeedback (protected)
+- [x] Create tRPC procedure: listFeedback (admin only)
+- [x] Add database functions: submitChapterFeedback, listChapterFeedback
+- [x] Add owner notification on feedback submission
+- [x] Add feedback button to AudiobookPlayer component
+- [x] Create FeedbackDialog component with issue type selection and description field
+- [x] Issue types: Audio Quality, Text Error, Translation Issue, Other
+- [x] Show success toast after submission
+- [x] Test feedback submission in both EN and PT (dialog opens, all issue types visible)
+- [x] Test that feedback is stored in database (vitest tests pass)
+- [x] Write vitest test for feedback submission (9 tests, all passing)
+- [ ] Save checkpoint

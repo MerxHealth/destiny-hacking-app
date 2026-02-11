@@ -25,6 +25,7 @@ import {
   flashcards,
   flashcardReviews,
   voiceModels,
+  chapterFeedback,
   type EmotionalAxis,
   type InsertEmotionalAxis,
   type SliderState,
@@ -1439,6 +1440,55 @@ export async function listAudiobookBookmarks(userId: number, chapterId: number) 
       eq(bookmarks.chapterId, chapterId)
     ))
     .orderBy(bookmarks.position);
+}
+
+// ==================== CHAPTER FEEDBACK ====================
+
+export async function submitChapterFeedback(data: {
+  userId: number;
+  chapterNumber: number;
+  language: "en" | "pt";
+  issueType: "audio_quality" | "text_error" | "translation_issue" | "other";
+  description: string;
+}) {
+  const result = await db
+    .insert(chapterFeedback)
+    .values({
+      userId: data.userId,
+      chapterNumber: data.chapterNumber,
+      language: data.language,
+      issueType: data.issueType,
+      description: data.description,
+      status: "pending",
+    });
+  
+  return {
+    id: Number(result[0].insertId),
+    ...data,
+    status: "pending" as const,
+    createdAt: new Date(),
+  };
+}
+
+export async function listChapterFeedback(
+  chapterNumber?: number,
+  status?: "pending" | "reviewed" | "resolved"
+) {
+  let query = db.select().from(chapterFeedback);
+  
+  const conditions = [];
+  if (chapterNumber !== undefined) {
+    conditions.push(eq(chapterFeedback.chapterNumber, chapterNumber));
+  }
+  if (status !== undefined) {
+    conditions.push(eq(chapterFeedback.status, status));
+  }
+  
+  if (conditions.length > 0) {
+    query = query.where(and(...conditions)) as any;
+  }
+  
+  return query.orderBy(desc(chapterFeedback.createdAt));
 }
 
 // ==================== PDF BOOK ====================
