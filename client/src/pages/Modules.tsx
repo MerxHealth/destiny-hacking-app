@@ -119,6 +119,103 @@ export default function Modules() {
   );
 }
 
+interface DecisionOption {
+  choice: string;
+  impact: Record<string, number>;
+  outcome: string;
+}
+
+interface DecisionChallenge {
+  scenario: string;
+  options: DecisionOption[];
+}
+
+function DecisionChallengeView({
+  challenge,
+  isCompleted,
+  onComplete,
+  isPending,
+}: {
+  challenge: any;
+  isCompleted: boolean;
+  onComplete: () => void;
+  isPending: boolean;
+}) {
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [showOutcome, setShowOutcome] = useState(false);
+
+  // Parse the challenge data
+  const data: DecisionChallenge | null = typeof challenge === 'string'
+    ? (() => { try { return JSON.parse(challenge); } catch { return null; } })()
+    : challenge;
+
+  if (!data || !data.scenario) {
+    return <p className="text-sm text-muted-foreground">No challenge available.</p>;
+  }
+
+  const handleSelect = (index: number) => {
+    if (isCompleted || showOutcome) return;
+    setSelectedOption(index);
+    setShowOutcome(true);
+  };
+
+  return (
+    <div className="space-y-3">
+      {/* Scenario */}
+      <div className="bg-muted/30 rounded-lg p-3">
+        <p className="text-sm font-medium text-foreground">{data.scenario}</p>
+      </div>
+
+      {/* Options */}
+      <div className="space-y-2">
+        {data.options.map((option, i) => {
+          const isSelected = selectedOption === i;
+          const impactSum = Object.values(option.impact).reduce((a, b) => a + b, 0);
+          const isPositive = impactSum > 0;
+          const isNeutral = impactSum === 0;
+
+          return (
+            <div key={i}>
+              <button
+                onClick={() => handleSelect(i)}
+                disabled={isCompleted || showOutcome}
+                className={`w-full text-left p-3 rounded-lg border transition-all text-sm ${
+                  isSelected
+                    ? isPositive
+                      ? 'border-green-500 bg-green-500/10'
+                      : isNeutral
+                      ? 'border-yellow-500 bg-yellow-500/10'
+                      : 'border-red-500 bg-red-500/10'
+                    : 'border-border/50 hover:border-primary/50 hover:bg-primary/5'
+                } ${isCompleted ? 'opacity-60 cursor-default' : ''}`}
+              >
+                <span className="font-medium">{option.choice}</span>
+              </button>
+              {isSelected && showOutcome && (
+                <div className={`mt-1 ml-2 p-2 rounded text-xs ${
+                  isPositive ? 'text-green-600 dark:text-green-400' : isNeutral ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
+                }`}>
+                  {option.outcome}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Complete button */}
+      {showOutcome && !isCompleted && (
+        <Button size="sm" onClick={onComplete} disabled={isPending}>
+          {isPending ? "Completing..." : "Mark Challenge Complete"}
+        </Button>
+      )}
+      {isCompleted && (
+        <Badge className="bg-green-500 text-xs">Challenge Completed</Badge>
+      )}
+    </div>
+  );
+}
+
 interface ModuleDetailProps {
   module: any;
   progress: any;
@@ -255,16 +352,12 @@ function ModuleDetail({ module, progress, onClose }: ModuleDetailProps) {
           {/* Decision Challenge */}
           <section className="bg-card rounded-xl p-4 border border-border/50">
             <h3 className="font-bold text-sm mb-2">Decision Challenge</h3>
-            <p className="text-sm text-foreground leading-relaxed mb-3">{module.decisionChallenge}</p>
-            
-            {progress && !progress.challengeCompleted && !isCompleted && (
-              <Button size="sm" onClick={handleCompleteChallenge} disabled={completeChallenge.isPending}>
-                {completeChallenge.isPending ? "Completing..." : "Mark Challenge Complete"}
-              </Button>
-            )}
-            {progress?.challengeCompleted && (
-              <Badge className="bg-green-500 text-xs">Challenge Completed</Badge>
-            )}
+            <DecisionChallengeView
+              challenge={module.decisionChallenge}
+              isCompleted={!!progress?.challengeCompleted || isCompleted}
+              onComplete={handleCompleteChallenge}
+              isPending={completeChallenge.isPending}
+            />
           </section>
 
           {/* Reflection */}

@@ -1,0 +1,58 @@
+{
+  "query": "SELECT COUNT(*) as count FROM book_modules; SELECT id, moduleNumber, title FROM book_modules ORDER BY moduleNumber LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4S4NaSTm8gULMAn.ab4bddc10a61 --database fsRnWghWhaoD2r3KXXoRti --execute SELECT COUNT(*) as count FROM book_modules; SELECT id, moduleNumber, title FROM book_modules ORDER BY moduleNumber LIMIT 20;",
+  "rows": [
+    {
+      "count": "14"
+    },
+    {
+      "count": "id\tmoduleNumber\ttitle"
+    },
+    {
+      "count": "1\t1\tThe Divine Gift"
+    },
+    {
+      "count": "2\t2\tThe Unbreakable Law"
+    },
+    {
+      "count": "3\t3\tThe Unfair Advantage"
+    },
+    {
+      "count": "4\t4\tThe Gravity of Choice"
+    },
+    {
+      "count": "5\t5\tThe Crossroads"
+    },
+    {
+      "count": "6\t6\tThe Phoenix Moment"
+    },
+    {
+      "count": "7\t7\tThe Inner Citadel (Stoicism)"
+    },
+    {
+      "count": "8\t8\tResponsibility as Power"
+    },
+    {
+      "count": "9\t9\tThe Alchemy of Will"
+    },
+    {
+      "count": "10\t10\tThe Surfer and the Wave"
+    },
+    {
+      "count": "11\t11\tPrayer as Will Amplifier"
+    },
+    {
+      "count": "12\t12\tThe Power of Tribe"
+    },
+    {
+      "count": "13\t13\tThe Architect of Destiny"
+    },
+    {
+      "count": "14\t14\tYour Invictus Moment"
+    }
+  ],
+  "messages": [],
+  "stdout": "count\n14\nid\tmoduleNumber\ttitle\n1\t1\tThe Divine Gift\n2\t2\tThe Unbreakable Law\n3\t3\tThe Unfair Advantage\n4\t4\tThe Gravity of Choice\n5\t5\tThe Crossroads\n6\t6\tThe Phoenix Moment\n7\t7\tThe Inner Citadel (Stoicism)\n8\t8\tResponsibility as Power\n9\t9\tThe Alchemy of Will\n10\t10\tThe Surfer and the Wave\n11\t11\tPrayer as Will Amplifier\n12\t12\tThe Power of Tribe\n13\t13\tThe Architect of Destiny\n14\t14\tYour Invictus Moment\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}

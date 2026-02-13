@@ -1128,4 +1128,22 @@
 - [x] Add slider colour transition from low colour to high colour (interpolateColor function)
 - [x] Show reflection prompt on axis detail/tap (expandable card with reflection section)
 - [x] Test all 15 axes display correctly (all 15 verified in browser + 4 vitest tests passing)
+- [x] Save checkpoint
+
+## Phase 45: Investigate & Fix Practice Modules
+- [x] Check routes and pages for Practice Modules (route exists at /modules, Modules.tsx page exists)
+- [x] Check database schema for modules/exercises (bookModules + moduleProgress tables, all 14 modules seeded)
+- [x] Identify what was planned and what's broken (decisionChallenge JSON rendered directly as React child → crash)
+- [x] Fix Practice Modules: created DecisionChallengeView component to render branching scenarios interactively
 - [ ] Save checkpoint
+
+## Phase 46: Daily Check-In Flow (Morning/Midday/Evening)
+- [ ] Implement daily check-in cycle
+- [ ] Midday check shows only 3 lowest axes
+
+## Phase 47: Spider/Radar Chart for 15 Axes
+- [ ] Add radar chart visualization for all 15 axes
+
+## Phase 48: Milestone Badges
+- [ ] Award badges for maintaining axis scores above 70
+- [ ] Invictus Badge for all 15 above 70
