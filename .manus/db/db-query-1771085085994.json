@@ -1,0 +1,49 @@
+{
+  "query": "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'book_chapters' ORDER BY ORDINAL_POSITION;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4S4NaSTm8gULMAn.ab4bddc10a61 --database fsRnWghWhaoD2r3KXXoRti --execute SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'book_chapters' ORDER BY ORDINAL_POSITION;",
+  "rows": [
+    {
+      "COLUMN_NAME": "id"
+    },
+    {
+      "COLUMN_NAME": "chapterNumber"
+    },
+    {
+      "COLUMN_NAME": "title"
+    },
+    {
+      "COLUMN_NAME": "description"
+    },
+    {
+      "COLUMN_NAME": "moduleId"
+    },
+    {
+      "COLUMN_NAME": "audioUrl"
+    },
+    {
+      "COLUMN_NAME": "audioDuration"
+    },
+    {
+      "COLUMN_NAME": "audioGenerated"
+    },
+    {
+      "COLUMN_NAME": "pdfStartPage"
+    },
+    {
+      "COLUMN_NAME": "pdfEndPage"
+    },
+    {
+      "COLUMN_NAME": "createdAt"
+    },
+    {
+      "COLUMN_NAME": "updatedAt"
+    },
+    {
+      "COLUMN_NAME": "audioUrlPt"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_NAME\nid\nchapterNumber\ntitle\ndescription\nmoduleId\naudioUrl\naudioDuration\naudioGenerated\npdfStartPage\npdfEndPage\ncreatedAt\nupdatedAt\naudioUrlPt\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

@@ -1,0 +1,118 @@
+{
+  "query": "SELECT id, chapterNumber, title, audioGenerated FROM book_chapters ORDER BY chapterNumber ASC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4S4NaSTm8gULMAn.ab4bddc10a61 --database fsRnWghWhaoD2r3KXXoRti --execute SELECT id, chapterNumber, title, audioGenerated FROM book_chapters ORDER BY chapterNumber ASC;",
+  "rows": [
+    {
+      "id": "90002",
+      "chapterNumber": "1",
+      "title": "Test Chapter",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "30001",
+      "chapterNumber": "1",
+      "title": "The Divine Gift: The Awesome Power and Terrifying Responsibility of Free Will",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "90004",
+      "chapterNumber": "1",
+      "title": "Test Chapter",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "30002",
+      "chapterNumber": "2",
+      "title": "The Unbreakable Law of Your Reality",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "30003",
+      "chapterNumber": "3",
+      "title": "The Unfair Advantage: How to Find Meaning in a World of Unfairness",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "30004",
+      "chapterNumber": "4",
+      "title": "The Gravity of Choice: Navigating the Roles of Abuser and Victim",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "30005",
+      "chapterNumber": "5",
+      "title": "The Crossroads of Choice: The Terrible Cost of Indecision",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "30006",
+      "chapterNumber": "6",
+      "title": "The Phoenix Moment: Rising from the Ashes of Your Past",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "30007",
+      "chapterNumber": "7",
+      "title": "Marcus Aurelius and the Stoic Path to Inner Freedom",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "30008",
+      "chapterNumber": "8",
+      "title": "The Weight of Your Will: The Radical Power of Taking Responsibility",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "30009",
+      "chapterNumber": "9",
+      "title": "The Alchemy of Will: Turning Suffering into Strength",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "30010",
+      "chapterNumber": "10",
+      "title": "The Surfer and the Wave: The Dance of Free Will and Universal Laws",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "30011",
+      "chapterNumber": "11",
+      "title": "The Paradox of Prayer: Does Asking for Help Undermine Free Will?",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "30012",
+      "chapterNumber": "12",
+      "title": "The Myth of the Lone Genius: Why Your Will Needs a Tribe",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "30013",
+      "chapterNumber": "13",
+      "title": "The Architect of Destiny: How Your Daily Choices Build Your Life",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "30014",
+      "chapterNumber": "14",
+      "title": "Your Invictus Moment: The Captain of Your Soul",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "90001",
+      "chapterNumber": "99",
+      "title": "Test Chapter",
+      "audioGenerated": "1"
+    },
+    {
+      "id": "90003",
+      "chapterNumber": "99",
+      "title": "Test Chapter",
+      "audioGenerated": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tchapterNumber\ttitle\taudioGenerated\n90002\t1\tTest Chapter\t1\n30001\t1\tThe Divine Gift: The Awesome Power and Terrifying Responsibility of Free Will\t1\n90004\t1\tTest Chapter\t1\n30002\t2\tThe Unbreakable Law of Your Reality\t1\n30003\t3\tThe Unfair Advantage: How to Find Meaning in a World of Unfairness\t1\n30004\t4\tThe Gravity of Choice: Navigating the Roles of Abuser and Victim\t1\n30005\t5\tThe Crossroads of Choice: The Terrible Cost of Indecision\t1\n30006\t6\tThe Phoenix Moment: Rising from the Ashes of Your Past\t1\n30007\t7\tMarcus Aurelius and the Stoic Path to Inner Freedom\t1\n30008\t8\tThe Weight of Your Will: The Radical Power of Taking Responsibility\t1\n30009\t9\tThe Alchemy of Will: Turning Suffering into Strength\t1\n30010\t10\tThe Surfer and the Wave: The Dance of Free Will and Universal Laws\t1\n30011\t11\tThe Paradox of Prayer: Does Asking for Help Undermine Free Will?\t1\n30012\t12\tThe Myth of the Lone Genius: Why Your Will Needs a Tribe\t1\n30013\t13\tThe Architect of Destiny: How Your Daily Choices Build Your Life\t1\n30014\t14\tYour Invictus Moment: The Captain of Your Soul\t1\n90001\t99\tTest Chapter\t1\n90003\t99\tTest Chapter\t1\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}
