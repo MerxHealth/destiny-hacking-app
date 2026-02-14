@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { appRouter } from "./routers";
 import type { User } from "../drizzle/schema";
 import * as db from "./db";
@@ -25,8 +25,23 @@ const createTestContext = (user: User | null = mockUser) => ({
   res: {} as any,
 });
 
+// Track test-created axis IDs for cleanup
+const testCreatedAxisIds: number[] = [];
+
 describe("Sliders tRPC Procedures", () => {
   let testAxisId: number;
+
+  afterAll(async () => {
+    // Clean up all test-created axes
+    const caller = appRouter.createCaller(createTestContext());
+    for (const id of testCreatedAxisIds) {
+      try {
+        await caller.sliders.deleteAxis({ axisId: id });
+      } catch {
+        // Ignore errors (axis may already be deleted)
+      }
+    }
+  });
 
   describe("createAxis", () => {
     it("should create a new emotional axis", async () => {
@@ -47,6 +62,7 @@ describe("Sliders tRPC Procedures", () => {
       expect(result.isActive).toBe(true);
 
       testAxisId = result.id;
+      testCreatedAxisIds.push(result.id);
     });
 
     it("should fail without authentication", async () => {
@@ -188,25 +204,29 @@ describe("Sliders tRPC Procedures", () => {
   });
 
   describe("updateAxis", () => {
-    it("should update an existing axis", async () => {
+    it("should update a test-created axis (not a book axis)", async () => {
       const caller = appRouter.createCaller(createTestContext());
 
-      const axes = await caller.sliders.listAxes();
-      expect(axes.length).toBeGreaterThan(0);
+      // Create a dedicated test axis to update, so we don't corrupt book axes
+      const tempAxis = await caller.sliders.createAxis({
+        leftLabel: "Before Left",
+        rightLabel: "Before Right",
+      });
+      testCreatedAxisIds.push(tempAxis.id);
 
       const result = await caller.sliders.updateAxis({
-        axisId: axes[0].id,
-        leftLabel: "Anxiety",
-        rightLabel: "Calm",
+        axisId: tempAxis.id,
+        leftLabel: "After Left",
+        rightLabel: "After Right",
       });
 
       expect(result.success).toBe(true);
 
       // Verify the update
       const updatedAxes = await caller.sliders.listAxes();
-      const updatedAxis = updatedAxes.find((a) => a.id === axes[0].id);
-      expect(updatedAxis?.leftLabel).toBe("Anxiety");
-      expect(updatedAxis?.rightLabel).toBe("Calm");
+      const updatedAxis = updatedAxes.find((a) => a.id === tempAxis.id);
+      expect(updatedAxis?.leftLabel).toBe("After Left");
+      expect(updatedAxis?.rightLabel).toBe("After Right");
     });
   });
 
@@ -219,6 +239,7 @@ describe("Sliders tRPC Procedures", () => {
         leftLabel: "Test Left",
         rightLabel: "Test Right",
       });
+      testCreatedAxisIds.push(newAxis.id);
 
       const result = await caller.sliders.deleteAxis({
         axisId: newAxis.id,

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { appRouter } from "./routers";
 import type { User } from "../drizzle/schema";
 
@@ -24,17 +24,33 @@ const createTestContext = (user: User | null = mockUser) => ({
   res: {} as any,
 });
 
+// Track test-created axis IDs for cleanup
+const testCreatedAxisIds: number[] = [];
+
 describe("Daily Cycle tRPC Procedures", () => {
   let testAxisId: number;
 
   beforeAll(async () => {
-    // Create a test axis for calibrations
+    // Create a test axis for calibrations (not using book axis labels)
     const caller = appRouter.createCaller(createTestContext());
     const axis = await caller.sliders.createAxis({
-      leftLabel: "Anxiety",
-      rightLabel: "Calm",
+      leftLabel: "Test Clouded",
+      rightLabel: "Test Clear",
     });
     testAxisId = axis.id;
+    testCreatedAxisIds.push(axis.id);
+  });
+
+  afterAll(async () => {
+    // Clean up test-created axes
+    const caller = appRouter.createCaller(createTestContext());
+    for (const id of testCreatedAxisIds) {
+      try {
+        await caller.sliders.deleteAxis({ axisId: id });
+      } catch {
+        // Ignore errors
+      }
+    }
   });
 
   describe("getToday", () => {
@@ -231,6 +247,7 @@ describe("AI Coach tRPC Procedures", () => {
         leftLabel: "Test Left",
         rightLabel: "Test Right",
       });
+      testCreatedAxisIds.push(newAxis.id);
 
       const result = await caller.aiCoach.analyzePattern({
         axisId: newAxis.id,

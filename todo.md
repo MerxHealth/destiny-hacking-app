@@ -1258,3 +1258,12 @@
 - [x] Handle Anthropic-specific headers (anthropic-version, x-api-key) and system message separation
 - [x] Write 15 vitest tests for new features (phase59-enhancements.test.ts)
 - [x] Save checkpoint and sync to GitHub
+
+## Phase 60: Fix Axes — Remove Old Axis Definitions
+- [x] Audit all axis definitions in DB and codebase (found 32 old test axes with null axisName)
+- [x] Remove old test axes (Anxiety↔Calm, Fear↔Courage, Test Left↔Test Right) and their slider_states from database
+- [x] Fix axis 0 (The Will Axis) labels back to correct values: Powerless ↔ Powerful
+- [x] Add afterAll cleanup to sliders.test.ts and dailyCycle.test.ts to prevent future DB pollution
+- [x] Fix updateAxis test to use a dedicated test axis instead of corrupting book axes
+- [x] Verify only 15 correct book axes remain (all 32 tests pass)
+- [x] Save checkpoint and sync to GitHub
