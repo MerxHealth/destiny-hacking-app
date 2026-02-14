@@ -1410,6 +1410,20 @@ export async function getLastListenedChapter(userId: number) {
   return result[0] || null;
 }
 
+export async function getAllAudiobookProgress(userId: number) {
+  return db
+    .select({
+      chapterId: audiobookProgress.chapterId,
+      currentPosition: audiobookProgress.currentPosition,
+      completed: audiobookProgress.completed,
+      completedAt: audiobookProgress.completedAt,
+      playbackSpeed: audiobookProgress.playbackSpeed,
+      lastListenedAt: audiobookProgress.lastListenedAt,
+    })
+    .from(audiobookProgress)
+    .where(eq(audiobookProgress.userId, userId));
+}
+
 export async function createAudiobookBookmark(data: {
   userId: number;
   chapterId: number;

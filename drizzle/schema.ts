@@ -705,7 +705,9 @@ export const bookChapters = mysqlTable("book_chapters", {
   // Chapter details
   chapterNumber: int("chapterNumber").notNull(),
   title: varchar("title", { length: 255 }).notNull(),
+  titlePt: varchar("titlePt", { length: 255 }),
   description: text("description"),
+  descriptionPt: text("descriptionPt"),
   
   // Module linkage
   moduleId: int("moduleId"), // Links to bookModules.id

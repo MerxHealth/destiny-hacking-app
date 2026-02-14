@@ -1,0 +1,94 @@
+{
+  "query": "SELECT id, chapterNumber, title, titlePt FROM book_chapters WHERE audioUrl IS NOT NULL ORDER BY chapterNumber;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4S4NaSTm8gULMAn.ab4bddc10a61 --database fsRnWghWhaoD2r3KXXoRti --execute SELECT id, chapterNumber, title, titlePt FROM book_chapters WHERE audioUrl IS NOT NULL ORDER BY chapterNumber;",
+  "rows": [
+    {
+      "id": "30001",
+      "chapterNumber": "1",
+      "title": "The Divine Gift: The Awesome Power and Terrifying Responsibility of Free Will",
+      "titlePt": "O Dom Divino: O Poder Incrível e a Responsabilidade Aterrorizante do Livre Arbítrio"
+    },
+    {
+      "id": "30002",
+      "chapterNumber": "2",
+      "title": "The Unbreakable Law of Your Reality",
+      "titlePt": "A Lei Inquebrantável da Sua Realidade"
+    },
+    {
+      "id": "30003",
+      "chapterNumber": "3",
+      "title": "The Unfair Advantage: How to Find Meaning in a World of Unfairness",
+      "titlePt": "A Vantagem Injusta: Como Encontrar Significado num Mundo de Injustiça"
+    },
+    {
+      "id": "30004",
+      "chapterNumber": "4",
+      "title": "The Gravity of Choice: Navigating the Roles of Abuser and Victim",
+      "titlePt": "A Gravidade da Escolha: Navegando os Papéis de Agressor e Vítima"
+    },
+    {
+      "id": "30005",
+      "chapterNumber": "5",
+      "title": "The Crossroads of Choice: The Terrible Cost of Indecision",
+      "titlePt": "A Encruzilhada da Escolha: O Custo Terrível da Indecisão"
+    },
+    {
+      "id": "30006",
+      "chapterNumber": "6",
+      "title": "The Phoenix Moment: Rising from the Ashes of Your Past",
+      "titlePt": "O Momento Fénix: Renascendo das Cinzas do Seu Passado"
+    },
+    {
+      "id": "30007",
+      "chapterNumber": "7",
+      "title": "Marcus Aurelius and the Stoic Path to Inner Freedom",
+      "titlePt": "Marco Aurélio e o Caminho Estoico para a Liberdade Interior"
+    },
+    {
+      "id": "30008",
+      "chapterNumber": "8",
+      "title": "The Weight of Your Will: The Radical Power of Taking Responsibility",
+      "titlePt": "O Peso da Sua Vontade: O Poder Radical de Assumir Responsabilidade"
+    },
+    {
+      "id": "30009",
+      "chapterNumber": "9",
+      "title": "The Alchemy of Will: Turning Suffering into Strength",
+      "titlePt": "A Alquimia da Vontade: Transformando Sofrimento em Força"
+    },
+    {
+      "id": "30010",
+      "chapterNumber": "10",
+      "title": "The Surfer and the Wave: The Dance of Free Will and Universal Laws",
+      "titlePt": "O Surfista e a Onda: A Dança do Livre Arbítrio e das Leis Universais"
+    },
+    {
+      "id": "30011",
+      "chapterNumber": "11",
+      "title": "The Paradox of Prayer: Does Asking for Help Undermine Free Will?",
+      "titlePt": "O Paradoxo da Oração: Pedir Ajuda Enfraquece o Livre Arbítrio?"
+    },
+    {
+      "id": "30012",
+      "chapterNumber": "12",
+      "title": "The Myth of the Lone Genius: Why Your Will Needs a Tribe",
+      "titlePt": "O Mito do Génio Solitário: Porque a Sua Vontade Precisa de uma Tribo"
+    },
+    {
+      "id": "30013",
+      "chapterNumber": "13",
+      "title": "The Architect of Destiny: How Your Daily Choices Build Your Life",
+      "titlePt": "O Arquitecto do Destino: Como as Suas Escolhas Diárias Constroem a Sua Vida"
+    },
+    {
+      "id": "30014",
+      "chapterNumber": "14",
+      "title": "Your Invictus Moment: The Captain of Your Soul",
+      "titlePt": "O Seu Momento Invictus: O Capitão da Sua Alma"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tchapterNumber\ttitle\ttitlePt\n30001\t1\tThe Divine Gift: The Awesome Power and Terrifying Responsibility of Free Will\tO Dom Divino: O Poder Incrível e a Responsabilidade Aterrorizante do Livre Arbítrio\n30002\t2\tThe Unbreakable Law of Your Reality\tA Lei Inquebrantável da Sua Realidade\n30003\t3\tThe Unfair Advantage: How to Find Meaning in a World of Unfairness\tA Vantagem Injusta: Como Encontrar Significado num Mundo de Injustiça\n30004\t4\tThe Gravity of Choice: Navigating the Roles of Abuser and Victim\tA Gravidade da Escolha: Navegando os Papéis de Agressor e Vítima\n30005\t5\tThe Crossroads of Choice: The Terrible Cost of Indecision\tA Encruzilhada da Escolha: O Custo Terrível da Indecisão\n30006\t6\tThe Phoenix Moment: Rising from the Ashes of Your Past\tO Momento Fénix: Renascendo das Cinzas do Seu Passado\n30007\t7\tMarcus Aurelius and the Stoic Path to Inner Freedom\tMarco Aurélio e o Caminho Estoico para a Liberdade Interior\n30008\t8\tThe Weight of Your Will: The Radical Power of Taking Responsibility\tO Peso da Sua Vontade: O Poder Radical de Assumir Responsabilidade\n30009\t9\tThe Alchemy of Will: Turning Suffering into Strength\tA Alquimia da Vontade: Transformando Sofrimento em Força\n30010\t10\tThe Surfer and the Wave: The Dance of Free Will and Universal Laws\tO Surfista e a Onda: A Dança do Livre Arbítrio e das Leis Universais\n30011\t11\tThe Paradox of Prayer: Does Asking for Help Undermine Free Will?\tO Paradoxo da Oração: Pedir Ajuda Enfraquece o Livre Arbítrio?\n30012\t12\tThe Myth of the Lone Genius: Why Your Will Needs a Tribe\tO Mito do Génio Solitário: Porque a Sua Vontade Precisa de uma Tribo\n30013\t13\tThe Architect of Destiny: How Your Daily Choices Build Your Life\tO Arquitecto do Destino: Como as Suas Escolhas Diárias Constroem a Sua Vida\n30014\t14\tYour Invictus Moment: The Captain of Your Soul\tO Seu Momento Invictus: O Capitão da Sua Alma\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

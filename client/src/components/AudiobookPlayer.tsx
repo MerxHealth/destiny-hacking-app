@@ -54,8 +54,6 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange, onChapte
   const { data: chapter } = trpc.audiobook.getChapter.useQuery({ chapterId });
   const { data: progress } = trpc.audiobook.getProgress.useQuery({ chapterId });
 
-  const utils = trpc.useUtils();
-
   // Determine the correct audio URL based on language
   const audioUrl = chapter
     ? language === "pt"
@@ -65,6 +63,7 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange, onChapte
 
   // Update progress mutation - don't invalidate the query to avoid re-triggering position restore
   const updateProgress = trpc.audiobook.updateProgress.useMutation();
+  const utils = trpc.useUtils();
 
   // Create bookmark mutation
   const createBookmark = trpc.audiobook.createBookmark.useMutation({
@@ -278,6 +277,48 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange, onChapte
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Save progress when user pauses
+  const saveCurrentPosition = useCallback(() => {
+    if (audioRef.current && audioRef.current.currentTime > 0) {
+      updateProgress.mutate({
+        chapterId,
+        currentPosition: Math.floor(audioRef.current.currentTime),
+        playbackSpeed: playbackSpeedRef.current,
+      });
+    }
+  }, [chapterId]);
+
+  // Save position when component unmounts or chapter changes
+  useEffect(() => {
+    return () => {
+      if (audioRef.current && audioRef.current.currentTime > 0) {
+        // Fire-and-forget save on cleanup
+        updateProgress.mutate({
+          chapterId,
+          currentPosition: Math.floor(audioRef.current.currentTime),
+          playbackSpeed: playbackSpeedRef.current,
+        });
+      }
+    };
+  }, [chapterId]);
+
+  // Save position before page unload
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (audioRef.current && audioRef.current.currentTime > 0) {
+        // Use sendBeacon for reliable save on page close
+        const data = JSON.stringify({
+          chapterId,
+          currentPosition: Math.floor(audioRef.current.currentTime),
+          playbackSpeed: playbackSpeedRef.current,
+        });
+        navigator.sendBeacon?.('/api/trpc/audiobook.updateProgress', data);
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [chapterId]);
+
   const handleEnded = useCallback(() => {
     setIsPlaying(false);
     updateProgress.mutate({
@@ -285,6 +326,11 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange, onChapte
       currentPosition: 0,
       playbackSpeed: playbackSpeedRef.current,
       completed: true,
+    }, {
+      onSuccess: () => {
+        // Invalidate allProgress so the chapter list updates completion indicators
+        utils.audiobook.getAllProgress.invalidate();
+      },
     });
     // Auto-play next chapter after a short delay if enabled
     if (autoPlay && onChapterEnded) {
@@ -329,7 +375,10 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange, onChapte
           onLoadedMetadata={handleLoadedMetadata}
           onEnded={handleEnded}
           onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
+          onPause={() => {
+            setIsPlaying(false);
+            saveCurrentPosition();
+          }}
         />
 
         {/* Progress Bar */}
@@ -486,7 +535,7 @@ export function AudiobookPlayer({ chapterId, language, onChapterChange, onChapte
         <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
           <div className="flex items-center gap-2">
             <Timer className="h-4 w-4 text-muted-foreground" />
-            <span className="text-xs font-medium">Sleep Timer</span>
+            <span className="text-xs font-medium">{language === 'pt' ? 'Temporizador' : 'Sleep Timer'}</span>
           </div>
           
           {sleepTimer === null ? (

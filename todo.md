@@ -1207,4 +1207,17 @@
 - [x] Identified 4 test chapters: IDs 90001, 90002, 90003, 90004 (titled "Test Chapter" at Ch1 and Ch99)
 - [x] Deleted all 4 test chapters from database
 - [x] Verified only 14 real chapters remain (Ch1-Ch14)
-- [ ] Save checkpoint
+- [x] Save checkpoint
+
+## Phase 55: Audiobook Enhancements
+- [x] Add Portuguese titles (titlePt) and descriptions (descriptionPt) to all 14 chapters
+- [x] Implement chapter completion tracking (mark chapters as fully listened)
+- [x] Show completion progress indicator on audiobook chapter list (green checkmarks, circular progress rings, progress bars)
+- [x] Implement audiobook resume from last playback position (save/restore per chapter)
+- [x] Update AudiobookPlayer to save position on pause/close and resume on reopen
+- [x] Add getAllProgress API endpoint for fetching all chapter progress at once
+- [x] Add overall progress summary bar (completed/total chapters)
+- [x] Translate Sleep Timer label to Portuguese
+- [x] Clean up remaining test chapters from database (IDs 90005-90016)
+- [x] Write 13 vitest tests for audiobook progress and Portuguese title features
+- [x] Save checkpoint

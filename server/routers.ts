@@ -1274,6 +1274,11 @@ Provide a brief Stoic strategist reflection (2-3 sentences) on the cause-effect 
       return db.getLastListenedChapter(ctx.user.id);
     }),
 
+    // Get all chapter progress for the user (completion indicators)
+    getAllProgress: protectedProcedure.query(async ({ ctx }) => {
+      return db.getAllAudiobookProgress(ctx.user.id);
+    }),
+
     // Generate chapter audio (admin only)
     generateChapter: protectedProcedure
       .input(z.object({
