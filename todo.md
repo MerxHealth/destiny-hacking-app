@@ -1221,3 +1221,8 @@
 - [x] Clean up remaining test chapters from database (IDs 90005-90016)
 - [x] Write 13 vitest tests for audiobook progress and Portuguese title features
 - [x] Save checkpoint
+
+## Phase 56: Replace Splash Screen Logo
+- [x] Replace green star icon on FirstImpression/splash screen with Merx X logo
+- [x] Upload logo to S3 and use CDN URL
+- [x] Save checkpoint

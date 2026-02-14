@@ -46,11 +46,11 @@ export function SplashScreen() {
             transition={{ duration: 1.5, ease: "easeOut" }}
           />
 
-          {/* Logo icon */}
+          {/* Merx X Logo */}
           <motion.div
-            className="relative z-10 flex items-center justify-center w-24 h-24 rounded-3xl bg-primary/10 border border-primary/20 mb-6"
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
+            className="relative z-10 flex items-center justify-center w-28 h-28 rounded-full mb-6 overflow-hidden"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
             transition={{
               type: "spring",
               stiffness: 200,
@@ -58,35 +58,14 @@ export function SplashScreen() {
               delay: 0.1,
             }}
           >
-            <motion.svg
-              viewBox="0 0 48 48"
-              className="w-14 h-14 text-primary"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 1, delay: 0.3 }}
-            >
-              {/* Compass/star shape representing destiny */}
-              <motion.path
-                d="M24 4L28 18L42 18L31 27L35 42L24 33L13 42L17 27L6 18L20 18Z"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 1.2, delay: 0.3, ease: "easeInOut" }}
-              />
-              <motion.circle
-                cx="24"
-                cy="24"
-                r="4"
-                fill="currentColor"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 1, duration: 0.3, type: "spring" }}
-              />
-            </motion.svg>
+            <motion.img
+              src="https://files.manuscdn.com/user_upload_by_module/session_file/111904132/CLAYatWdmCtjixTW.jpeg"
+              alt="Merx Logo"
+              className="w-full h-full object-cover"
+              initial={{ scale: 1.2 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+            />
           </motion.div>
 
           {/* App name with staggered animation */}
