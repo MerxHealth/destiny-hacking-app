@@ -149,13 +149,13 @@ export default function Philosophy() {
       >
         <div className="max-w-3xl mx-auto text-center">
           <Link href="/">
-            <button className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
+            <button className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white mb-8 transition-colors">
               <ArrowLeft className="h-4 w-4" />
               {t("Back", "Voltar")}
             </button>
           </Link>
           <motion.h1
-            className="text-4xl md:text-5xl font-bold tracking-tight text-foreground mb-4"
+            className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
@@ -163,7 +163,7 @@ export default function Philosophy() {
             {t("The Philosophy", "A Filosofia")}
           </motion.h1>
           <motion.p
-            className="text-lg text-muted-foreground"
+            className="text-lg text-white/60"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}

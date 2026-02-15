@@ -1315,3 +1315,9 @@
 - [x] BUG 2: Add max-h-[90vh] overflow-y-auto to Onboarding Card for mobile scroll
 - [x] Verify splash in light mode, onboarding buttons reachable on mobile
 - [x] Save checkpoint
+
+## Phase 65: Fix Philosophy Page Text Invisible in Light Mode
+- [x] Fix title: text-foreground → text-white
+- [x] Fix subtitle: text-muted-foreground → text-white/60
+- [x] Fix back button: text-muted-foreground → text-white/50, hover:text-foreground → hover:text-white
+- [x] Save checkpoint
