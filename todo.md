@@ -1278,3 +1278,33 @@
 - [x] Fix optionalDependencies lockfile mismatch — moved vite-plugin-manus-runtime back to devDependencies
 - [x] Regenerate pnpm-lock.yaml — confirmed root importers has no optionalDependencies
 - [x] Save checkpoint and publish
+
+## Phase 63: Bridge Redesign — Icon-Driven Command Center
+- [ ] Redesign NewHome.tsx hero header with Destiny Score and streak
+- [ ] Add DoctrineCard below hero (already exists, just import it)
+- [ ] Add Reflection Prompt of the Day from lowest axis
+- [ ] Keep Daily Cycle 3-column grid
+- [ ] Replace scrolling card list with 4×4 icon grid (16 features)
+- [ ] Add compact "Continue Listening/Reading" chips above icon grid
+- [ ] Add "Today's Intention" banner if exists
+- [ ] Remove large Audiobook/Book/Modules cards
+- [ ] Add Dashboard to Arsenal page under Growth & Tracking
+- [ ] Add Philosophy to Arsenal page under Community & Tools
+- [ ] Restore dark mode default in App.tsx
+- [ ] Test all navigation paths
+- [ ] Save checkpoint
+
+## Phase 63b: Bridge Redesign — Icon-Driven Command Center (RETRY)
+- [ ] Rewrite NewHome.tsx: compact hero with- [x] Compact hero: greeting + Destiny Score + streak (single line)
+- [x] Add DoctrineCard below hero
+- [x] Add Reflection Prompt from lowest axis below Doctrine
+- [x] Keep Daily Cycle 3-column grid
+- [x] Add Today's Intention single-line banner
+- [x] Add compact Continue Listening/Reading chips
+- [x] Replace scrolling cards with 4×4 Lucide icon grid (16 features)
+- [x] Add InvictusFooter at bottom
+- [x] Remove large Audiobook/Book/Modules/Quick Tools cards
+- [x] Add Dashboard (Command Bridge) to Arsenal under Growth & Tracking
+- [x] Add Philosophy to Arsenal under Community & Tools
+- [x] Restore dark mode default in App.tsx
+- [x] Save checkpoint

@@ -1,24 +1,33 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent } from "@/components/ui/card";
 import { Onboarding } from "@/components/Onboarding";
 import { InitialCalibration } from "@/components/InitialCalibration";
 import { FirstImpression } from "@/components/FirstImpression";
 import { PullToRefresh } from "@/components/PullToRefresh";
+import { DoctrineCard } from "@/components/DoctrineCard";
+import { InvictusFooter } from "@/components/InvictusFooter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getChapterTitle } from "@shared/chapterTranslations";
 import {
+  Layers,
   BookOpen,
   Headphones,
   GraduationCap,
+  Trophy,
   TrendingUp,
-  Flame,
-  ChevronRight,
+  Zap,
+  Brain,
+  Calendar,
+  BarChart3,
+  Sprout,
+  Shield,
+  Users,
+  Star,
+  ScrollText,
+  Settings,
   Play,
-  Sparkles,
 } from "lucide-react";
 
 export default function NewHome() {
@@ -26,22 +35,27 @@ export default function NewHome() {
   const utils = trpc.useUtils();
   const { language, t } = useLanguage();
   const { data: user } = trpc.auth.me.useQuery();
-  const { data: overallProgress } = trpc.progress.getOverallProgress.useQuery();
   const { data: todayCycle } = trpc.dailyCycle.getToday.useQuery();
   const { data: axes } = trpc.sliders.listAxes.useQuery();
   const { data: lastListened } = trpc.audiobook.getLastListened.useQuery();
   const { data: pdfProgress } = trpc.pdf.getProgress.useQuery();
+  const { data: destinyScore } = trpc.sliders.getDestinyScore.useQuery();
+  const { data: recentCycles } = trpc.dailyCycle.getHistory.useQuery({ days: 30 });
+  const { data: lowest3 } = trpc.sliders.getLowest3.useQuery();
 
   const handleRefresh = useCallback(async () => {
     await Promise.all([
-      utils.progress.getOverallProgress.invalidate(),
       utils.dailyCycle.getToday.invalidate(),
       utils.sliders.listAxes.invalidate(),
       utils.audiobook.getLastListened.invalidate(),
       utils.pdf.getProgress.invalidate(),
+      utils.sliders.getDestinyScore.invalidate(),
+      utils.dailyCycle.getHistory.invalidate(),
+      utils.sliders.getLowest3.invalidate(),
     ]);
   }, [utils]);
 
+  // First-time user flow
   const [showFirstImpression, setShowFirstImpression] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showInitialCalibration, setShowInitialCalibration] = useState(false);
@@ -90,12 +104,50 @@ export default function NewHome() {
     setShowInitialCalibration(false);
   };
 
-  const greeting = () => {
+  // Greeting
+  const greeting = useMemo(() => {
     const hour = new Date().getHours();
     if (hour < 12) return t("Good Morning", "Bom Dia");
     if (hour < 17) return t("Good Afternoon", "Boa Tarde");
     return t("Good Evening", "Boa Noite");
-  };
+  }, [t]);
+
+  // Streak calculation
+  const streak = useMemo(() => {
+    if (!recentCycles || recentCycles.length === 0) return 0;
+    const sortedCycles = [...recentCycles]
+      .filter(c => c.isComplete)
+      .sort((a, b) => new Date(b.cycleDate).getTime() - new Date(a.cycleDate).getTime());
+    let count = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    for (let i = 0; i < sortedCycles.length; i++) {
+      const cycleDate = new Date(sortedCycles[i].cycleDate);
+      cycleDate.setHours(0, 0, 0, 0);
+      const expectedDate = new Date(today);
+      expectedDate.setDate(today.getDate() - i);
+      expectedDate.setHours(0, 0, 0, 0);
+      if (cycleDate.getTime() === expectedDate.getTime()) {
+        count++;
+      } else {
+        break;
+      }
+    }
+    return count;
+  }, [recentCycles]);
+
+  // Lowest axis for reflection prompt
+  const lowestAxis = useMemo(() => {
+    if (!lowest3 || lowest3.length === 0 || !axes) return null;
+    const lowestState = lowest3[0];
+    const axis = axes.find((a: any) => a.id === lowestState.axisId);
+    if (!axis) return null;
+    return { ...axis, value: lowestState.value };
+  }, [lowest3, axes]);
+
+  // Continue chips
+  const hasLastListened = lastListened && lastListened.currentPosition > 0 && !lastListened.completed;
+  const hasBookProgress = pdfProgress && pdfProgress.currentPage > 1;
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -103,263 +155,137 @@ export default function NewHome() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Check if there's something to continue
-  const hasLastListened = lastListened && lastListened.currentPosition > 0 && !lastListened.completed;
-  const hasBookProgress = pdfProgress && pdfProgress.currentPage > 1;
+  // 4×4 icon grid
+  const navItems = useMemo(() => [
+    // Row 1 — Core Practice
+    { icon: Layers, label: t("Sliders", "Controles"), path: "/sliders", bg: "bg-blue-500/15", color: "text-blue-400" },
+    { icon: BookOpen, label: t("Chapters", "Capítulos"), path: "/book", bg: "bg-emerald-500/15", color: "text-emerald-400" },
+    { icon: Headphones, label: t("Audio", "Áudio"), path: "/audiobook", bg: "bg-violet-500/15", color: "text-violet-400" },
+    { icon: GraduationCap, label: t("Modules", "Módulos"), path: "/modules", bg: "bg-amber-500/15", color: "text-amber-400" },
+    // Row 2 — Growth
+    { icon: Trophy, label: t("Badges", "Medalhas"), path: "/achievements", bg: "bg-yellow-500/15", color: "text-yellow-400" },
+    { icon: TrendingUp, label: t("Progress", "Progresso"), path: "/progress", bg: "bg-cyan-500/15", color: "text-cyan-400" },
+    { icon: Zap, label: "Flashcards", path: "/flashcards", bg: "bg-orange-500/15", color: "text-orange-400" },
+    { icon: Brain, label: t("AI Insights", "Insights IA"), path: "/insights", bg: "bg-sky-500/15", color: "text-sky-400" },
+    // Row 3 — Deeper Tools
+    { icon: Calendar, label: t("Week Review", "Revisão Sem."), path: "/weekly-review", bg: "bg-cyan-500/15", color: "text-cyan-400" },
+    { icon: BarChart3, label: t("Month Report", "Rel. Mensal"), path: "/monthly-report", bg: "bg-teal-500/15", color: "text-teal-400" },
+    { icon: Sprout, label: t("Sow & Reap", "Semear"), path: "/sowing-reaping", bg: "bg-green-500/15", color: "text-green-400" },
+    { icon: Shield, label: t("Bias Clear", "Limpar Viés"), path: "/bias-clearing", bg: "bg-purple-500/15", color: "text-purple-400" },
+    // Row 4 — Community & Philosophy
+    { icon: Users, label: t("Tribe", "Tribo"), path: "/inner-circle", bg: "bg-indigo-500/15", color: "text-indigo-400" },
+    { icon: Star, label: t("Challenges", "Desafios"), path: "/challenges", bg: "bg-pink-500/15", color: "text-pink-400" },
+    { icon: ScrollText, label: t("Philosophy", "Filosofia"), path: "/philosophy", bg: "bg-emerald-500/15", color: "text-emerald-400" },
+    { icon: Settings, label: t("Settings", "Config."), path: "/settings", bg: "bg-gray-500/15", color: "text-gray-400" },
+  ], [t]);
 
   return (
     <>
       {showFirstImpression && (
         <FirstImpression onBegin={handleFirstImpressionComplete} />
       )}
-
       {showOnboarding && (
-        <Onboarding
-          onComplete={handleOnboardingComplete}
-          onSkip={handleOnboardingSkip}
-        />
+        <Onboarding onComplete={handleOnboardingComplete} onSkip={handleOnboardingSkip} />
       )}
-
       {showInitialCalibration && (
-        <InitialCalibration
-          open={showInitialCalibration}
-          onComplete={handleCalibrationComplete}
-        />
+        <InitialCalibration open={showInitialCalibration} onComplete={handleCalibrationComplete} />
       )}
 
       <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background">
-        {/* Hero Header */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-primary/20 via-primary/10 to-background px-4 pt-6 pb-8">
+        {/* Section 1: Compact Hero Header */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary/20 via-primary/10 to-background px-4 pt-5 pb-4">
           <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-primary/5 blur-3xl" />
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-primary/10 blur-2xl" />
-
           <div className="relative">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-sm text-muted-foreground font-medium">
-                  {greeting()}
-                </p>
-                <h1 className="text-2xl font-bold mt-0.5">Destiny Hacking</h1>
+            <h1 className="text-lg font-bold">
+              {greeting}, {t("Captain", "Capitão")}.
+            </h1>
+            {destinyScore?.score !== null && destinyScore?.score !== undefined ? (
+              <div className="flex items-center gap-4 mt-1">
+                <span className="text-sm text-muted-foreground">
+                  ⚡ {t("Destiny Score", "Pontuação Destino")}: <strong className="text-primary">{destinyScore.score}%</strong>
+                </span>
+                {streak > 0 && (
+                  <span className="text-sm text-muted-foreground">
+                    🔥 {t("Day", "Dia")} <strong className="text-primary">{streak}</strong>
+                  </span>
+                )}
               </div>
-              <div className="relative w-14 h-14">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="4" fill="none" className="text-muted/30" />
-                  <circle
-                    cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="4" fill="none"
-                    strokeDasharray={`${2 * Math.PI * 24}`}
-                    strokeDashoffset={`${2 * Math.PI * 24 * (1 - (overallProgress?.overall || 0) / 100)}`}
-                    strokeLinecap="round"
-                    className="text-primary transition-all duration-700"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-xs font-bold">{overallProgress?.overall || 0}%</span>
-                </div>
-              </div>
-            </div>
+            ) : (
+              <p className="text-sm text-muted-foreground mt-1">
+                {t("Begin your journey. Calibrate your 15 axes.", "Comece sua jornada. Calibre seus 15 eixos.")}
+              </p>
+            )}
           </div>
         </div>
 
-        <div className="px-4 py-6 space-y-6">
+        <div className="px-3 py-3 space-y-3 pb-28">
+          {/* Section 2: Doctrine of the Week */}
+          <DoctrineCard />
 
-          {/* Continue Section - shows last listened chapter and/or last read page */}
-          {(hasLastListened || hasBookProgress) && (
-            <div className="space-y-3">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
-                {t("Continue Where You Left Off", "Continue de Onde Parou")}
-              </h2>
-
-              {hasLastListened && lastListened && (
-                <Card
-                  className="overflow-hidden border-primary/30 bg-gradient-to-r from-primary/5 to-transparent hover:shadow-lg active:scale-[0.98] transition-all duration-200 cursor-pointer"
-                  onClick={() => navigate(`/audiobook?chapter=${lastListened.chapterId}`)}
-                >
-                  <div className="flex items-center gap-4 p-4">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0 relative">
-                      <Headphones className="w-7 h-7 text-violet-400" />
-                      <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                        <Play className="w-3 h-3 text-primary-foreground ml-0.5" />
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted-foreground font-medium">
-                        {t("Continue Listening", "Continuar a Ouvir")}
-                      </p>
-                      <p className="text-sm font-semibold mt-0.5 truncate">
-                        {language === "pt" ? "Cap." : "Ch."} {lastListened.chapterNumber}: {getChapterTitle(lastListened.chapterNumber, language, lastListened.title)}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <Progress
-                          value={lastListened.audioDuration ? (lastListened.currentPosition / lastListened.audioDuration) * 100 : 0}
-                          className="h-1 flex-1"
-                        />
-                        <span className="text-[10px] text-muted-foreground flex-shrink-0">
-                          {formatTime(lastListened.currentPosition)}
-                          {lastListened.audioDuration ? ` / ${formatTime(lastListened.audioDuration)}` : ""}
-                        </span>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+          {/* Section 3: Reflection Prompt of the Day */}
+          {lowestAxis && (lowestAxis as any).reflectionPrompt && (
+            <Card className="border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-transparent">
+              <CardContent className="py-3 px-4">
+                <div className="flex items-start gap-2.5">
+                  <span className="text-xl flex-shrink-0">{(lowestAxis as any).emoji}</span>
+                  <div className="min-w-0">
+                    <p className="text-xs italic text-foreground leading-relaxed line-clamp-2">
+                      "{(lowestAxis as any).reflectionPrompt}"
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      — {(lowestAxis as any).name || `${(lowestAxis as any).leftLabel} ↔ ${(lowestAxis as any).rightLabel}`} · {(lowestAxis as any).value}/100
+                    </p>
                   </div>
-                </Card>
-              )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-              {hasBookProgress && pdfProgress && (
-                <Card
-                  className="overflow-hidden border-emerald-500/30 bg-gradient-to-r from-emerald-500/5 to-transparent hover:shadow-lg active:scale-[0.98] transition-all duration-200 cursor-pointer"
-                  onClick={() => navigate("/book")}
-                >
-                  <div className="flex items-center gap-4 p-4">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center flex-shrink-0 relative">
-                      <BookOpen className="w-7 h-7 text-emerald-400" />
-                      <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
-                        <Play className="w-3 h-3 text-white ml-0.5" />
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted-foreground font-medium">
-                        {t("Continue Reading", "Continuar a Ler")}
-                      </p>
-                      <p className="text-sm font-semibold mt-0.5">
-                        {t("Page", "Página")} {pdfProgress.currentPage} {t("of", "de")} {pdfProgress.totalPages}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <Progress
-                          value={parseFloat(pdfProgress.percentComplete as any) || 0}
-                          className="h-1 flex-1"
-                        />
-                        <span className="text-[10px] text-muted-foreground flex-shrink-0">
-                          {Math.round(parseFloat(pdfProgress.percentComplete as any) || 0)}%
-                        </span>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                  </div>
-                </Card>
-              )}
+          {/* Section 7: Today's Intention (compact single-line banner) */}
+          {todayCycle?.intendedAction && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card/50 border border-border/50">
+              <span className="text-sm flex-shrink-0">🎯</span>
+              <p className="text-xs text-foreground truncate">
+                {t("Today", "Hoje")}: "{todayCycle.intendedAction}"
+              </p>
             </div>
           )}
 
-          {/* Main Content Cards */}
-          <div className="space-y-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
-              {t("Learn & Grow", "Aprender & Crescer")}
+          {/* Section 4: Daily Cycle (kept as-is) */}
+          <div className="space-y-2">
+            <h2 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-1">
+              {t("Daily Cycle", "Ciclo Diário")}
             </h2>
-
-            <Link href="/audiobook">
-              <Card className="overflow-hidden hover:shadow-lg active:scale-[0.98] transition-all duration-200 cursor-pointer border-border/50">
-                <div className="flex items-center gap-4 p-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0">
-                    <Headphones className="w-7 h-7 text-violet-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold">{t("Audiobook", "Audiolivro")}</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {t("14 chapters in English & Portuguese", "14 capítulos em Inglês e Português")}
-                    </p>
-                    {overallProgress?.audiobook && (
-                      <div className="mt-2">
-                        <Progress value={overallProgress.audiobook.percent} className="h-1" />
-                        <p className="text-[10px] text-muted-foreground mt-1">
-                          {overallProgress.audiobook.completed}/{overallProgress.audiobook.total} {t("chapters", "capítulos")}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                </div>
-              </Card>
-            </Link>
-
-            <Link href="/book">
-              <Card className="overflow-hidden hover:shadow-lg active:scale-[0.98] transition-all duration-200 cursor-pointer border-border/50">
-                <div className="flex items-center gap-4 p-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center flex-shrink-0">
-                    <BookOpen className="w-7 h-7 text-emerald-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold">{t("Read Book", "Ler Livro")}</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {t("Interactive PDF with highlights", "PDF interativo com destaques")}
-                    </p>
-                    {overallProgress?.pdf && (
-                      <div className="mt-2">
-                        <Progress value={overallProgress.pdf.percent} className="h-1" />
-                        <p className="text-[10px] text-muted-foreground mt-1">
-                          {t("Page", "Página")} {overallProgress.pdf.currentPage}/{overallProgress.pdf.totalPages}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                </div>
-              </Card>
-            </Link>
-
-            <Link href="/modules">
-              <Card className="overflow-hidden hover:shadow-lg active:scale-[0.98] transition-all duration-200 cursor-pointer border-border/50">
-                <div className="flex items-center gap-4 p-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center flex-shrink-0">
-                    <GraduationCap className="w-7 h-7 text-amber-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold">{t("Practice Modules", "Módulos de Prática")}</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {t("14 interactive learning exercises", "14 exercícios interativos de aprendizagem")}
-                    </p>
-                    {overallProgress?.modules && (
-                      <div className="mt-2">
-                        <Progress value={overallProgress.modules.percent} className="h-1" />
-                        <p className="text-[10px] text-muted-foreground mt-1">
-                          {overallProgress.modules.completed}/{overallProgress.modules.total} {t("modules", "módulos")}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                </div>
-              </Card>
-            </Link>
-          </div>
-
-          {/* Daily Practice */}
-          <div className="space-y-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
-              {t("Daily Practice", "Prática Diária")}
-            </h2>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               <Link href="/daily-cycle?phase=morning">
-                <Card className={`p-3 text-center hover:shadow-md active:scale-[0.97] transition-all duration-200 cursor-pointer ${todayCycle?.morningCompletedAt ? "bg-primary/10 border-primary/30" : "border-border/50"}`}>
-                  <div className="text-2xl mb-1">🌅</div>
-                  <p className="text-xs font-medium">{t("Morning", "Manhã")}</p>
-                  <p className="text-[10px] text-muted-foreground">5 min</p>
+                <Card className={`p-2.5 text-center hover:shadow-md active:scale-[0.97] transition-all duration-200 cursor-pointer ${todayCycle?.morningCompletedAt ? "bg-primary/10 border-primary/30" : "border-border/50"}`}>
+                  <div className="text-xl mb-0.5">🌅</div>
+                  <p className="text-[10px] font-medium">{t("Morning", "Manhã")}</p>
                   {todayCycle?.morningCompletedAt && (
-                    <div className="w-4 h-4 rounded-full bg-primary mx-auto mt-1 flex items-center justify-center">
-                      <span className="text-[8px] text-primary-foreground">✓</span>
+                    <div className="w-3.5 h-3.5 rounded-full bg-primary mx-auto mt-0.5 flex items-center justify-center">
+                      <span className="text-[7px] text-primary-foreground">✓</span>
                     </div>
                   )}
                 </Card>
               </Link>
               <Link href="/daily-cycle?phase=midday">
-                <Card className={`p-3 text-center hover:shadow-md active:scale-[0.97] transition-all duration-200 cursor-pointer ${todayCycle?.middayCompletedAt ? "bg-primary/10 border-primary/30" : "border-border/50"}`}>
-                  <div className="text-2xl mb-1">☀️</div>
-                  <p className="text-xs font-medium">{t("Midday", "Meio-dia")}</p>
-                  <p className="text-[10px] text-muted-foreground">2 min</p>
+                <Card className={`p-2.5 text-center hover:shadow-md active:scale-[0.97] transition-all duration-200 cursor-pointer ${todayCycle?.middayCompletedAt ? "bg-primary/10 border-primary/30" : "border-border/50"}`}>
+                  <div className="text-xl mb-0.5">☀️</div>
+                  <p className="text-[10px] font-medium">{t("Midday", "Meio-dia")}</p>
                   {todayCycle?.middayCompletedAt && (
-                    <div className="w-4 h-4 rounded-full bg-primary mx-auto mt-1 flex items-center justify-center">
-                      <span className="text-[8px] text-primary-foreground">✓</span>
+                    <div className="w-3.5 h-3.5 rounded-full bg-primary mx-auto mt-0.5 flex items-center justify-center">
+                      <span className="text-[7px] text-primary-foreground">✓</span>
                     </div>
                   )}
                 </Card>
               </Link>
               <Link href="/daily-cycle?phase=evening">
-                <Card className={`p-3 text-center hover:shadow-md active:scale-[0.97] transition-all duration-200 cursor-pointer ${todayCycle?.eveningCompletedAt ? "bg-primary/10 border-primary/30" : "border-border/50"}`}>
-                  <div className="text-2xl mb-1">🌙</div>
-                  <p className="text-xs font-medium">{t("Evening", "Noite")}</p>
-                  <p className="text-[10px] text-muted-foreground">5 min</p>
+                <Card className={`p-2.5 text-center hover:shadow-md active:scale-[0.97] transition-all duration-200 cursor-pointer ${todayCycle?.eveningCompletedAt ? "bg-primary/10 border-primary/30" : "border-border/50"}`}>
+                  <div className="text-xl mb-0.5">🌙</div>
+                  <p className="text-[10px] font-medium">{t("Evening", "Noite")}</p>
                   {todayCycle?.eveningCompletedAt && (
-                    <div className="w-4 h-4 rounded-full bg-primary mx-auto mt-1 flex items-center justify-center">
-                      <span className="text-[8px] text-primary-foreground">✓</span>
+                    <div className="w-3.5 h-3.5 rounded-full bg-primary mx-auto mt-0.5 flex items-center justify-center">
+                      <span className="text-[7px] text-primary-foreground">✓</span>
                     </div>
                   )}
                 </Card>
@@ -367,81 +293,73 @@ export default function NewHome() {
             </div>
           </div>
 
-          {/* Quick Tools */}
-          <div className="space-y-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
-              {t("Quick Tools", "Ferramentas Rápidas")}
+          {/* Continue Where You Left Off — compact chips */}
+          {(hasLastListened || hasBookProgress) && (
+            <div className="grid grid-cols-2 gap-2">
+              {hasLastListened && lastListened && (
+                <div
+                  onClick={() => navigate(`/audiobook?chapter=${lastListened.chapterId}`)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-violet-500/10 border border-violet-500/20 cursor-pointer hover:bg-violet-500/15 active:scale-[0.97] transition-all"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-violet-500/20 flex items-center justify-center flex-shrink-0">
+                    <Play className="w-3.5 h-3.5 text-violet-400 ml-0.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-medium text-violet-300 truncate">
+                      🎧 {language === "pt" ? "Cap" : "Ch"}.{lastListened.chapterNumber}
+                    </p>
+                    <p className="text-[9px] text-muted-foreground">
+                      {formatTime(lastListened.currentPosition)}
+                      {lastListened.audioDuration ? `/${formatTime(lastListened.audioDuration)}` : ""}
+                    </p>
+                  </div>
+                </div>
+              )}
+              {hasBookProgress && pdfProgress && (
+                <div
+                  onClick={() => navigate("/book")}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 cursor-pointer hover:bg-emerald-500/15 active:scale-[0.97] transition-all"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <Play className="w-3.5 h-3.5 text-emerald-400 ml-0.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-medium text-emerald-300 truncate">
+                      📖 {t("Page", "Pág.")} {pdfProgress.currentPage}
+                    </p>
+                    <p className="text-[9px] text-muted-foreground">
+                      {t("of", "de")} {pdfProgress.totalPages}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Section 5: Quick Navigate Grid — 4×4 icon grid */}
+          <div className="space-y-2">
+            <h2 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-1">
+              {t("Navigate", "Navegar")}
             </h2>
-            <div className="grid grid-cols-2 gap-3">
-              <Link href="/sliders">
-                <Card className="p-4 hover:shadow-md active:scale-[0.97] transition-all duration-200 cursor-pointer border-border/50">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center">
-                      <TrendingUp className="w-5 h-5 text-blue-400" />
+            <div className="grid grid-cols-4 gap-2">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link key={item.path} href={item.path}>
+                    <div className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-card border border-border/50 hover:shadow-md active:scale-95 transition-all">
+                      <div className={`w-9 h-9 rounded-xl ${item.bg} flex items-center justify-center mb-1`}>
+                        <Icon className={`w-4.5 h-4.5 ${item.color}`} />
+                      </div>
+                      <span className="text-[9px] font-medium text-center leading-tight text-muted-foreground">{item.label}</span>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium">Sliders</p>
-                      <p className="text-[10px] text-muted-foreground">{t("Calibrate state", "Calibrar estado")}</p>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-              <Link href="/flashcards">
-                <Card className="p-4 hover:shadow-md active:scale-[0.97] transition-all duration-200 cursor-pointer border-border/50">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-orange-500/15 flex items-center justify-center">
-                      <Sparkles className="w-5 h-5 text-orange-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Flashcards</p>
-                      <p className="text-[10px] text-muted-foreground">{t("Review concepts", "Rever conceitos")}</p>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-              <Link href="/achievements">
-                <Card className="p-4 hover:shadow-md active:scale-[0.97] transition-all duration-200 cursor-pointer border-border/50">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-yellow-500/15 flex items-center justify-center">
-                      <Flame className="w-5 h-5 text-yellow-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{t("Achievements", "Conquistas")}</p>
-                      <p className="text-[10px] text-muted-foreground">{t("Your badges", "Suas medalhas")}</p>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-              <Link href="/progress">
-                <Card className="p-4 hover:shadow-md active:scale-[0.97] transition-all duration-200 cursor-pointer border-border/50">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-cyan-500/15 flex items-center justify-center">
-                      <TrendingUp className="w-5 h-5 text-cyan-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{t("Progress", "Progresso")}</p>
-                      <p className="text-[10px] text-muted-foreground">{t("Full dashboard", "Painel completo")}</p>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
-          {/* Today's Intention */}
-          {todayCycle?.intendedAction && (
-            <Card className="p-4 bg-card/50 border-border/50">
-              <div className="flex items-start gap-3">
-                <div className="text-lg">🎯</div>
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {t("Today's Intention", "Intenção de Hoje")}
-                  </p>
-                  <p className="text-sm mt-1">{todayCycle.intendedAction}</p>
-                </div>
-              </div>
-            </Card>
-          )}
+          {/* Section 6: Invictus Footer */}
+          <InvictusFooter />
         </div>
       </PullToRefresh>
     </>

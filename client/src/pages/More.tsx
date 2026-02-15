@@ -10,6 +10,7 @@ import {
   Layers,
   Lightbulb,
   Moon,
+  ScrollText,
   Settings,
   Shield,
   Sprout,
@@ -75,6 +76,14 @@ export default function More() {
           path: "/progress",
           color: "text-emerald-500",
           bg: "bg-emerald-500/10",
+        },
+        {
+          icon: Compass,
+          label: t("Command Bridge", "Ponte de Comando"),
+          description: t("Destiny Score, radar chart & AI greeting", "Pontuação Destino, gráfico radar e saudação IA"),
+          path: "/dashboard",
+          color: "text-primary",
+          bg: "bg-primary/10",
         },
         {
           icon: Trophy,
@@ -144,6 +153,14 @@ export default function More() {
           path: "/challenges",
           color: "text-pink-500",
           bg: "bg-pink-500/10",
+        },
+        {
+          icon: ScrollText,
+          label: t("Philosophy", "Filosofia"),
+          description: t("The Prologue — why this app exists", "O Prólogo — porque esta app existe"),
+          path: "/philosophy",
+          color: "text-emerald-500",
+          bg: "bg-emerald-500/10",
         },
         {
           icon: Shield,
