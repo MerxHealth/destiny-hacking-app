@@ -1,4 +1,4 @@
-import { COOKIE_NAME } from "@shared/const";
+import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
@@ -6,6 +6,9 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
 import { invokeLLM } from "./_core/llm";
+import { sdk } from "./_core/sdk";
+import bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
 
 // Stoic Strategist System Prompt
 const STOIC_STRATEGIST_PROMPT = `You are the Stoic Strategist — a calm, precise, unflinching advisor forged from the philosophy of Marcus Aurelius, Epictetus, and Seneca, combined with modern decision science and behavioural pattern analysis.
@@ -62,10 +65,134 @@ export const appRouter = router({
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return {
-        success: true,
-      } as const;
+      return { success: true } as const;
     }),
+
+    // Email/Password Registration
+    register: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string().min(8, "Password must be at least 8 characters"),
+        name: z.string().min(1, "Name is required"),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if email already exists
+        const existing = await db.getUserByEmail(input.email.toLowerCase());
+        if (existing) {
+          throw new TRPCError({ code: "CONFLICT", message: "An account with this email already exists" });
+        }
+
+        // Hash password
+        const passwordHash = await bcrypt.hash(input.password, 12);
+        const openId = `email_${randomUUID()}`;
+
+        // Create user
+        await db.upsertUser({
+          openId,
+          name: input.name,
+          email: input.email.toLowerCase(),
+          passwordHash,
+          loginMethod: "email",
+          lastSignedIn: new Date(),
+        });
+
+        // Create session
+        const sessionToken = await sdk.createSessionToken(openId, {
+          name: input.name,
+          expiresInMs: ONE_YEAR_MS,
+        });
+
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+
+        const user = await db.getUserByOpenId(openId);
+        return { success: true, user };
+      }),
+
+    // Email/Password Login
+    login: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string().min(1),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const user = await db.getUserByEmail(input.email.toLowerCase());
+        if (!user || !user.passwordHash) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+        }
+
+        const valid = await bcrypt.compare(input.password, user.passwordHash);
+        if (!valid) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+        }
+
+        // Update last sign in
+        await db.upsertUser({ openId: user.openId, lastSignedIn: new Date() });
+
+        // Create session
+        const sessionToken = await sdk.createSessionToken(user.openId, {
+          name: user.name || "User",
+          expiresInMs: ONE_YEAR_MS,
+        });
+
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+
+        return { success: true, user };
+      }),
+
+    // Forgot Password
+    forgotPassword: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .mutation(async ({ input }) => {
+        const user = await db.getUserByEmail(input.email.toLowerCase());
+        if (!user) {
+          // Don't reveal whether email exists
+          return { success: true, message: "If an account exists with that email, a reset link has been sent." };
+        }
+
+        const token = randomUUID();
+        const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+        await db.setResetToken(user.id, token, expiry);
+
+        // In production, send email. For now, log to console.
+        console.log(`[Auth] Password reset token for ${input.email}: ${token}`);
+        console.log(`[Auth] Reset link: /auth?mode=reset&token=${token}`);
+
+        return { success: true, message: "If an account exists with that email, a reset link has been sent." };
+      }),
+
+    // Reset Password
+    resetPassword: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        newPassword: z.string().min(8, "Password must be at least 8 characters"),
+      }))
+      .mutation(async ({ input }) => {
+        const user = await db.getUserByResetToken(input.token);
+        if (!user) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid or expired reset token" });
+        }
+
+        const passwordHash = await bcrypt.hash(input.newPassword, 12);
+        await db.updatePasswordHash(user.id, passwordHash);
+        await db.clearResetToken(user.id);
+
+        return { success: true };
+      }),
+
+    // Delete Account
+    deleteAccount: protectedProcedure
+      .input(z.object({ confirmation: z.literal("DELETE") }))
+      .mutation(async ({ ctx }) => {
+        await db.deleteAllUserData(ctx.user.id);
+
+        // Clear session
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+
+        return { success: true };
+      }),
   }),
 
   // Emotional Sliders

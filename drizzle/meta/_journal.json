@@ -127,6 +127,13 @@
       "when": 1771086369358,
       "tag": "0017_parched_maria_hill",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1771187766064,
+      "tag": "0018_lucky_nightshade",
+      "breakpoints": true
     }
   ]
 }

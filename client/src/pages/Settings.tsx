@@ -6,7 +6,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Bell, Clock, Save, Download, FileJson, FileSpreadsheet, Shield, Sun, Moon, Palette, Globe } from "lucide-react";
+import { ArrowLeft, Bell, Clock, Save, Download, FileJson, FileSpreadsheet, Shield, Sun, Moon, Palette, Globe, FileText, AlertTriangle, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { downloadCSV, downloadJSON, convertToCSV, formatCompleteDataForExport, formatSliderHistoryForExport } from "@/lib/export";
 import { requestNotificationPermission, areNotificationsEnabled, scheduleDailyReminder, sendLocalNotification } from "@/lib/pushNotifications";
@@ -19,6 +30,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export default function Settings() {
   const { theme, toggleTheme, switchable } = useTheme();
   const { language, setLanguage, t } = useLanguage();
+  const [, navigate] = useLocation();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   // Fetch notification settings
   const { data: settings, isLoading: settingsLoading } = trpc.notifications.getSettings.useQuery(
@@ -46,6 +60,19 @@ export default function Settings() {
       utils.notifications.getSettings.invalidate();
       setHasChanges(false);
       toast.success(t("Settings saved", "Configurações salvas"));
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const deleteAccountMutation = trpc.auth.deleteAccount.useMutation({
+    onSuccess: () => {
+      toast.success(t('Account deleted successfully', 'Conta excluída com sucesso'));
+      // Clear any auth tokens and redirect to landing
+      document.cookie = 'app_session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      localStorage.removeItem('token');
+      window.location.href = '/';
     },
     onError: (error) => {
       toast.error(error.message);
@@ -263,23 +290,105 @@ export default function Settings() {
           </CardContent>
         </Card>
 
-        {/* Privacy & Data */}
+        {/* Legal & Privacy */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-primary" />
-              <CardTitle>{t('Privacy & Data Sovereignty', 'Privacidade e Soberania de Dados')}</CardTitle>
+              <FileText className="h-5 w-5 text-primary" />
+              <CardTitle>{t('Legal & Privacy', 'Legal e Privacidade')}</CardTitle>
             </div>
             <CardDescription>
-              {t('Your data belongs to you. Learn how we protect it.', 'Seus dados pertencem a você. Saiba como os protegemos.')}
+              {t('Your data belongs to you. Review our policies.', 'Seus dados pertencem a você. Revise nossas políticas.')}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button variant="outline" asChild>
-              <Link href="/privacy">{t('View Privacy Policy', 'Ver Política de Privacidade')}</Link>
+          <CardContent className="space-y-3">
+            <Button variant="outline" className="w-full justify-start" asChild>
+              <Link href="/terms">
+                <FileText className="h-4 w-4 mr-2" />
+                {t('Terms & Conditions', 'Termos e Condições')}
+              </Link>
+            </Button>
+            <Button variant="outline" className="w-full justify-start" asChild>
+              <Link href="/privacy">
+                <Shield className="h-4 w-4 mr-2" />
+                {t('Privacy Policy', 'Política de Privacidade')}
+              </Link>
             </Button>
           </CardContent>
         </Card>
+
+        {/* Delete Account */}
+        <Card className="border-destructive/30">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <CardTitle className="text-destructive">{t('Delete Account', 'Excluir Conta')}</CardTitle>
+            </div>
+            <CardDescription>
+              {t(
+                'Permanently delete your account and all associated data. This action cannot be undone.',
+                'Exclua permanentemente sua conta e todos os dados associados. Esta ação não pode ser desfeita.'
+              )}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              variant="destructive"
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              {t('Delete My Account', 'Excluir Minha Conta')}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Delete Account Confirmation Dialog */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-destructive">
+                {t('Delete Account?', 'Excluir Conta?')}
+              </AlertDialogTitle>
+              <AlertDialogDescription className="space-y-3">
+                <p>
+                  {t(
+                    'This will permanently delete your account, all calibration data, progress, streaks, achievements, and journal entries. This cannot be undone.',
+                    'Isso excluirá permanentemente sua conta, todos os dados de calibração, progresso, sequências, conquistas e entradas de diário. Isso não pode ser desfeito.'
+                  )}
+                </p>
+                <div className="pt-2">
+                  <Label className="text-sm font-medium text-foreground">
+                    {t('Type DELETE to confirm:', 'Digite DELETE para confirmar:')}
+                  </Label>
+                  <Input
+                    value={deleteConfirmText}
+                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    placeholder="DELETE"
+                    className="mt-2"
+                  />
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setDeleteConfirmText('')}>
+                {t('Cancel', 'Cancelar')}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                disabled={deleteConfirmText !== 'DELETE'}
+                onClick={async () => {
+                  try {
+                    await deleteAccountMutation.mutateAsync({ confirmation: 'DELETE' });
+                  } catch (err: any) {
+                    toast.error(err.message || t('Failed to delete account', 'Falha ao excluir conta'));
+                  }
+                }}
+              >
+                {t('Delete Everything', 'Excluir Tudo')}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </main>
     </div>
   );

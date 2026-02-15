@@ -7,6 +7,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { AppShell } from "./components/AppShell";
 import { AnimatedRoutes } from "./components/AnimatedRoutes";
 import { SplashScreen } from "./components/SplashScreen";
+import { useAuth } from "./hooks/useAuth";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Sliders from "./pages/Sliders";
@@ -35,12 +36,41 @@ import { GenerateAudiobook } from "./pages/GenerateAudiobook";
 import { ProgressDashboard } from "./pages/ProgressDashboard";
 import { Flashcards } from "./pages/Flashcards";
 import { OfflineIndicator } from "./components/OfflineIndicator";
-import Privacy from "./pages/Privacy";
 import Philosophy from "./pages/Philosophy";
 import MonthlyReportPage from "./pages/MonthlyReportPage";
+import LandingPage from "./pages/LandingPage";
+import AuthPage from "./pages/AuthPage";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
 import { LanguageProvider } from "./contexts/LanguageContext";
 
-function Router() {
+/**
+ * Public routes — accessible without authentication.
+ * Landing page, auth, terms, privacy, philosophy.
+ */
+function PublicRouter() {
+  const [location] = useLocation();
+
+  return (
+    <AnimatedRoutes>
+      <Switch key={location}>
+        <Route path="/" component={LandingPage} />
+        <Route path="/auth" component={AuthPage} />
+        <Route path="/terms" component={TermsPage} />
+        <Route path="/privacy" component={PrivacyPage} />
+        <Route path="/philosophy" component={Philosophy} />
+        <Route path="/about" component={Philosophy} />
+        <Route path="/404" component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </AnimatedRoutes>
+  );
+}
+
+/**
+ * Authenticated routes — all app features behind auth.
+ */
+function AuthenticatedRouter() {
   const [location] = useLocation();
 
   return (
@@ -73,16 +103,39 @@ function Router() {
         <Route path="/batch-audiobook-generation" component={BatchAudiobookGeneration} />
         <Route path="/record-voice" component={RecordVoice} />
         <Route path="/generate-audiobook" component={GenerateAudiobook} />
-        <Route path="/privacy" component={Privacy} />
+        <Route path="/terms" component={TermsPage} />
+        <Route path="/privacy" component={PrivacyPage} />
         <Route path="/philosophy" component={Philosophy} />
         <Route path="/about" component={Philosophy} />
         <Route path="/monthly-report" component={MonthlyReportPage} />
+        <Route path="/auth" component={NewHome} />
         <Route path="/404" component={NotFound} />
-        {/* Final fallback route */}
         <Route component={NotFound} />
       </Switch>
     </AnimatedRoutes>
   );
+}
+
+/**
+ * Root router — decides between public and authenticated views.
+ */
+function RootRouter() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    // Show nothing while checking auth — SplashScreen covers this
+    return null;
+  }
+
+  if (isAuthenticated) {
+    return (
+      <AppShell>
+        <AuthenticatedRouter />
+      </AppShell>
+    );
+  }
+
+  return <PublicRouter />;
 }
 
 function App() {
@@ -93,9 +146,7 @@ function App() {
           <TooltipProvider>
           <Toaster />
           <SplashScreen />
-          <AppShell>
-            <Router />
-          </AppShell>
+          <RootRouter />
           <OfflineIndicator />
           </TooltipProvider>
         </ThemeProvider>

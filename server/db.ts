@@ -2142,3 +2142,152 @@ export async function getFlashcardStats(userId: number) {
     avgEaseFactor,
   };
 }
+
+
+// ============================================================================
+// EMAIL/PASSWORD AUTHENTICATION
+// ============================================================================
+
+/**
+ * Get user by email address
+ */
+export async function getUserByEmail(email: string): Promise<User | null> {
+  const results = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+  return results[0] || null;
+}
+
+/**
+ * Set password reset token for a user
+ */
+export async function setResetToken(userId: number, token: string, expiry: Date): Promise<void> {
+  await db
+    .update(users)
+    .set({ resetToken: token, resetTokenExpiry: expiry })
+    .where(eq(users.id, userId));
+}
+
+/**
+ * Get user by reset token (and check expiry)
+ */
+export async function getUserByResetToken(token: string): Promise<User | null> {
+  const results = await db
+    .select()
+    .from(users)
+    .where(and(
+      eq(users.resetToken, token),
+      gte(users.resetTokenExpiry, new Date())
+    ))
+    .limit(1);
+  return results[0] || null;
+}
+
+/**
+ * Clear reset token after password change
+ */
+export async function clearResetToken(userId: number): Promise<void> {
+  await db
+    .update(users)
+    .set({ resetToken: null, resetTokenExpiry: null })
+    .where(eq(users.id, userId));
+}
+
+/**
+ * Update user password hash
+ */
+export async function updatePasswordHash(userId: number, passwordHash: string): Promise<void> {
+  await db
+    .update(users)
+    .set({ passwordHash })
+    .where(eq(users.id, userId));
+}
+
+// ============================================================================
+// ACCOUNT DELETION
+// ============================================================================
+
+/**
+ * Delete ALL user data across ALL tables (for account deletion)
+ * Uses CASCADE from foreign keys where possible, but also explicitly deletes
+ * from tables that might not have CASCADE set up.
+ */
+export async function deleteAllUserData(userId: number): Promise<void> {
+  // Delete in order to respect foreign key constraints
+  // Child tables first, then parent tables
+
+  // Flashcard reviews (references flashcards)
+  await db.delete(flashcardReviews).where(eq(flashcardReviews.userId, userId));
+  // Flashcards
+  await db.delete(flashcards).where(eq(flashcards.userId, userId));
+
+  // PDF annotations, highlights, bookmarks, reading progress
+  await db.delete(pdfAnnotations).where(eq(pdfAnnotations.userId, userId));
+  await db.delete(pdfHighlights).where(eq(pdfHighlights.userId, userId));
+  await db.delete(bookmarks).where(eq(bookmarks.userId, userId));
+  await db.delete(pdfReadingProgress).where(eq(pdfReadingProgress.userId, userId));
+
+  // Voice models
+  await db.delete(voiceModels).where(eq(voiceModels.userId, userId));
+
+  // Audiobook progress
+  await db.delete(audiobookProgress).where(eq(audiobookProgress.userId, userId));
+
+  // Chapter feedback
+  await db.delete(chapterFeedback).where(eq(chapterFeedback.userId, userId));
+
+  // Module progress
+  await db.delete(moduleProgress).where(eq(moduleProgress.userId, userId));
+
+  // Slider states
+  await db.delete(sliderStates).where(eq(sliderStates.userId, userId));
+
+  // Daily cycles
+  await db.delete(dailyCycles).where(eq(dailyCycles.userId, userId));
+
+  // Insights
+  await db.delete(insights).where(eq(insights.userId, userId));
+
+  // Achievements
+  await db.delete(achievements).where(eq(achievements.userId, userId));
+
+  // Emotional axes
+  await db.delete(emotionalAxes).where(eq(emotionalAxes.userId, userId));
+
+  // Connections (both directions)
+  await db.delete(connections).where(
+    or(eq(connections.userId, userId), eq(connections.connectedUserId, userId))
+  );
+
+  // Group participants & sessions
+  await db.delete(groupParticipants).where(eq(groupParticipants.userId, userId));
+  await db.delete(groupSessions).where(eq(groupSessions.creatorId, userId));
+
+  // Prayer journal
+  await db.delete(prayerJournal).where(eq(prayerJournal.userId, userId));
+
+  // Sowing & reaping entries
+  await db.delete(sowingReapingEntries).where(eq(sowingReapingEntries.userId, userId));
+
+  // Bias checks
+  await db.delete(biasChecks).where(eq(biasChecks.userId, userId));
+
+  // Weekly reviews
+  await db.delete(weeklyReviews).where(eq(weeklyReviews.userId, userId));
+
+  // Slider profiles
+  await db.delete(sliderProfiles).where(eq(sliderProfiles.userId, userId));
+
+  // Accountability partnerships
+  await db.delete(accountabilityPartnerships).where(
+    or(eq(accountabilityPartnerships.userId1, userId), eq(accountabilityPartnerships.userId2, userId))
+  );
+
+  // Slider alignment sessions
+  await db.delete(sliderAlignmentSessions).where(eq(sliderAlignmentSessions.creatorId, userId));
+
+  // Finally, delete the user record itself
+  await db.delete(users).where(eq(users.id, userId));
+}

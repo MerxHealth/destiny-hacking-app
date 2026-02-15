@@ -1369,3 +1369,18 @@
 - [x] Replace confirm() with AlertDialog in Challenges.tsx
 - [x] Write 21 vitest tests (phase70-alertdialog.test.ts)
 - [x] Save checkpoint
+
+## Phase 71: App Store Launch Preparation (6 Tasks)
+- [x] TASK 2: Email/Password Auth — schema changes (email, passwordHash, resetToken fields)
+- [x] TASK 2: Auth endpoints (register, login, logout, forgot-password, reset-password, me)
+- [x] TASK 2: AuthPage.tsx (Login/SignUp/ForgotPassword tabs, bilingual)
+- [x] TASK 2: Replace Manus auth with email/password auth in useAuth
+- [x] TASK 3: TermsPage.tsx — full T&C content, accessible without auth
+- [x] TASK 4: PrivacyPage.tsx — full Privacy Policy content, accessible without auth
+- [x] TASK 1: LandingPage.tsx — 7-section marketing page (Hero, What Is, 15 Axes, How It Works, Philosophy, Download, Footer)
+- [x] TASK 6: AppStoreBadges.tsx — Apple/Google badge placeholders with "Coming Soon"
+- [x] TASK 5: Account Deletion — backend endpoint + Settings UI with confirmation dialog
+- [x] Route wiring in App.tsx (conditional auth routing, public routes for /terms, /privacy, /auth)
+- [x] Settings page updates (Legal section with T&C/Privacy links, Delete Account section)
+- [x] Write 43 vitest tests for all new features (phase71-launch-prep.test.ts)
+- [x] Save checkpoint
