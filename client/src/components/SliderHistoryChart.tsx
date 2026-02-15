@@ -18,20 +18,22 @@ interface SliderHistoryChartProps {
 
 export function SliderHistoryChart({ axisId }: SliderHistoryChartProps) {
   const [dateRange, setDateRange] = useState<7 | 30 | 90>(30);
+  const [selectedAxisId, setSelectedAxisId] = useState<number | undefined>(axisId);
 
   const { data: axes } = trpc.sliders.listAxes.useQuery();
+
+  const effectiveAxisId = selectedAxisId ?? axes?.[0]?.id ?? 0;
   const { data: history } = trpc.sliders.getHistory.useQuery(
-    { axisId: axisId || axes?.[0]?.id || 0, days: dateRange },
-    { enabled: !!(axisId || axes?.[0]?.id) }
+    { axisId: effectiveAxisId, days: dateRange },
+    { enabled: !!effectiveAxisId }
   );
+  const selectedAxis = axes?.find(a => a.id === effectiveAxisId);
 
-  const selectedAxis = axes?.find(a => a.id === (axisId || axes?.[0]?.id));
-
-  // Transform data for recharts
+  // Transform data for recharts — BUG 1 FIX: use clientTimestamp instead of timestamp
   const chartData = history?.map((state: any) => ({
-    date: new Date(state.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    date: new Date(state.clientTimestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     value: state.value,
-    fullDate: new Date(state.timestamp).toLocaleDateString(),
+    fullDate: new Date(state.clientTimestamp).toLocaleDateString(),
   })) || [];
 
   // Calculate trend
@@ -172,18 +174,15 @@ export function SliderHistoryChart({ axisId }: SliderHistoryChartProps) {
               </LineChart>
             </ResponsiveContainer>
 
-            {/* Axis Selector */}
+            {/* Axis Selector — BUG 2 FIX: wire up onClick to setSelectedAxisId */}
             {axes && axes.length > 1 && (
               <div className="mt-6 flex flex-wrap gap-2">
                 {axes.map((axis: any) => (
                   <Button
                     key={axis.id}
-                    variant={axis.id === selectedAxis?.id ? "default" : "outline"}
+                    variant={axis.id === effectiveAxisId ? "default" : "outline"}
                     size="sm"
-                    onClick={() => {
-                      // This would need to be passed as a prop or use state management
-                      // For now, just showing the UI
-                    }}
+                    onClick={() => setSelectedAxisId(axis.id)}
                   >
                     {axis.leftLabel} ↔ {axis.rightLabel}
                   </Button>

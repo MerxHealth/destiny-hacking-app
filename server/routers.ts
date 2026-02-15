@@ -624,17 +624,30 @@ Provide a brief Stoic strategist reflection (2-3 sentences) on the cause-effect 
         // Update connection status
         await db.updateConnectionStatus(input.connectionId, ctx.user.id, "accepted");
 
-        // Create reverse connection
-        const connections = await db.getConnections(ctx.user.id);
-        const connection = connections.find(c => c.id === input.connectionId);
+        // Try to create reverse connection (may already exist)
+        try {
+          const connections = await db.getConnections(ctx.user.id);
+          const connection = connections.find(c => c.id === input.connectionId);
 
-        if (connection) {
-          await db.createConnection({
-            userId: connection.connectedUserId,
-            connectedUserId: ctx.user.id,
-            status: "accepted",
-            invitedBy: connection.invitedBy,
-          });
+          if (connection) {
+            // Check if reverse connection already exists
+            const existingReverse = await db.getConnections(connection.connectedUserId);
+            const alreadyExists = existingReverse.some(
+              c => c.connectedUserId === ctx.user.id && c.userId === connection.connectedUserId
+            );
+
+            if (!alreadyExists) {
+              await db.createConnection({
+                userId: connection.connectedUserId,
+                connectedUserId: ctx.user.id,
+                status: "accepted",
+                invitedBy: connection.invitedBy,
+              });
+            }
+          }
+        } catch (err) {
+          // Reverse connection failed but primary accept succeeded — don't throw
+          console.error("Reverse connection creation failed:", err);
         }
 
         return { success: true };
@@ -777,6 +790,14 @@ Provide a brief Stoic strategist reflection (2-3 sentences) on the cause-effect 
       .input(z.object({ sessionId: z.number() }))
       .mutation(async ({ ctx, input }) => {
         await db.leaveSession(input.sessionId, ctx.user.id);
+        return { success: true };
+      }),
+
+    // Delete a challenge (creator only)
+    deleteChallenge: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteChallenge(input.id, ctx.user.id);
         return { success: true };
       }),
 
@@ -1252,6 +1273,14 @@ Provide a brief Stoic strategist reflection (2-3 sentences) on the cause-effect 
     getToday: protectedProcedure.query(async ({ ctx }) => {
         const today = new Date().toISOString().split('T')[0];
         return db.getPrayerByDate(ctx.user.id, today);
+      }),
+
+    // Delete prayer entry
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deletePrayerEntry(input.id, ctx.user.id);
+        return { success: true };
       }),
   }),
 
@@ -1932,11 +1961,21 @@ Provide a brief Stoic strategist reflection (2-3 sentences) on the cause-effect 
         return db.updateFlashcard(input.flashcardId, input);
       }),
     
+    // List all flashcards with optional filter
+    listAll: protectedProcedure
+      .input(z.object({
+        filter: z.enum(["all", "due", "reviewed"]).default("all"),
+        limit: z.number().min(1).max(200).default(50),
+      }))
+      .query(async ({ ctx, input }) => {
+        return db.listFlashcardsFiltered(ctx.user.id, input.filter, input.limit);
+      }),
+
     // Delete flashcard
     delete: protectedProcedure
       .input(z.object({ flashcardId: z.number() }))
-      .mutation(async ({ input }) => {
-        await db.deleteFlashcard(input.flashcardId);
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteFlashcardByUser(input.flashcardId, ctx.user.id);
         return { success: true };
       }),
     

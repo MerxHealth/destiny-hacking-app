@@ -1,0 +1,106 @@
+{
+  "query": "SHOW TABLES;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4S4NaSTm8gULMAn.ab4bddc10a61 --database fsRnWghWhaoD2r3KXXoRti --execute SHOW TABLES;",
+  "rows": [
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "__drizzle_migrations"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "accountability_partnerships"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "achievements"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "audiobook_progress"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "bias_checks"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "book_chapters"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "book_modules"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "bookmarks"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "chapter_feedback"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "connections"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "daily_cycles"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "emotional_axes"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "flashcard_reviews"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "flashcards"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "group_participants"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "group_sessions"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "highlight_comments"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "highlight_reactions"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "insights"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "module_progress"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "pdf_annotations"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "pdf_highlights"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "pdf_reading_progress"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "prayer_journal"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "shared_highlights"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "slider_alignment_sessions"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "slider_profiles"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "slider_states"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "sowing_reaping_entries"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "users"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "voice_models"
+    },
+    {
+      "Tables_in_fsRnWghWhaoD2r3KXXoRti": "weekly_reviews"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_fsRnWghWhaoD2r3KXXoRti\n__drizzle_migrations\naccountability_partnerships\nachievements\naudiobook_progress\nbias_checks\nbook_chapters\nbook_modules\nbookmarks\nchapter_feedback\nconnections\ndaily_cycles\nemotional_axes\nflashcard_reviews\nflashcards\ngroup_participants\ngroup_sessions\nhighlight_comments\nhighlight_reactions\ninsights\nmodule_progress\npdf_annotations\npdf_highlights\npdf_reading_progress\nprayer_journal\nshared_highlights\nslider_alignment_sessions\nslider_profiles\nslider_states\nsowing_reaping_entries\nusers\nvoice_models\nweekly_reviews\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}

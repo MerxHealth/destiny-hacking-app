@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Trophy, Plus, Users, Calendar, Target } from "lucide-react";
+import { ArrowLeft, Trophy, Plus, Users, Calendar, Target, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/PageHeader";
 
@@ -47,6 +47,16 @@ export default function Challenges() {
     onSuccess: () => {
       utils.challenges.list.invalidate();
       toast.success("Joined challenge");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const deleteMutation = trpc.challenges.deleteChallenge.useMutation({
+    onSuccess: () => {
+      utils.challenges.list.invalidate();
+      toast.success("Challenge deleted");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -111,7 +121,20 @@ export default function Challenges() {
                           {challenge.description || "No description"}
                         </CardDescription>
                       </div>
-                      <Trophy className="h-5 w-5 text-primary flex-shrink-0" />
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm("Delete this challenge? This cannot be undone.")) {
+                              deleteMutation.mutate({ id: challenge.id });
+                            }
+                          }}
+                          className="text-muted-foreground/40 hover:text-red-500 transition-colors p-1"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                        <Trophy className="h-5 w-5 text-primary" />
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">

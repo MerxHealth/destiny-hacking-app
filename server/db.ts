@@ -612,6 +612,23 @@ export async function updateUserPushSubscription(
 }
 
 // ============================================================================
+// CHALLENGE DELETE
+// ============================================================================
+
+/**
+ * Delete a challenge (group session) if user is the creator.
+ * Also deletes all participant records for that session.
+ */
+export async function deleteChallenge(id: number, userId: number): Promise<void> {
+  // Delete participant entries first (FK cascade should handle this, but be explicit)
+  await db.delete(groupParticipants).where(eq(groupParticipants.sessionId, id));
+  // Delete the session itself (only if user is creator)
+  await db.delete(groupSessions).where(
+    and(eq(groupSessions.id, id), eq(groupSessions.creatorId, userId))
+  );
+}
+
+// ============================================================================
 // SLIDER PROFILES
 // ============================================================================
 
@@ -1073,6 +1090,18 @@ export async function getPrayerByDate(userId: number, date: string): Promise<Pra
     .limit(1);
   
   return results[0] || null;
+}
+
+/**
+ * Delete a prayer entry
+ */
+export async function deletePrayerEntry(id: number, userId: number): Promise<void> {
+  await db
+    .delete(prayerJournal)
+    .where(and(
+      eq(prayerJournal.id, id),
+      eq(prayerJournal.userId, userId)
+    ));
 }
 
 // ============================================================================
@@ -2039,6 +2068,58 @@ export async function updateFlashcard(
 
 export async function deleteFlashcard(flashcardId: number) {
   await db.delete(flashcards).where(eq(flashcards.id, flashcardId));
+}
+
+/**
+ * Delete a flashcard (owned by user)
+ */
+export async function deleteFlashcardByUser(flashcardId: number, userId: number): Promise<void> {
+  await db
+    .delete(flashcards)
+    .where(and(
+      eq(flashcards.id, flashcardId),
+      eq(flashcards.userId, userId)
+    ));
+}
+
+/**
+ * List flashcards with optional filter
+ */
+export async function listFlashcardsFiltered(
+  userId: number,
+  filter: "all" | "due" | "reviewed",
+  limit: number
+) {
+  if (filter === "due") {
+    const now = new Date();
+    return db
+      .select()
+      .from(flashcards)
+      .where(and(
+        eq(flashcards.userId, userId),
+        lte(flashcards.nextReviewDate, now)
+      ))
+      .orderBy(desc(flashcards.createdAt))
+      .limit(limit);
+  }
+  if (filter === "reviewed") {
+    return db
+      .select()
+      .from(flashcards)
+      .where(and(
+        eq(flashcards.userId, userId),
+        sql`${flashcards.lastReviewedAt} IS NOT NULL`
+      ))
+      .orderBy(desc(flashcards.createdAt))
+      .limit(limit);
+  }
+  // "all"
+  return db
+    .select()
+    .from(flashcards)
+    .where(eq(flashcards.userId, userId))
+    .orderBy(desc(flashcards.createdAt))
+    .limit(limit);
 }
 
 export async function getFlashcardStats(userId: number) {

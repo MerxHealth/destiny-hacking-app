@@ -1,0 +1,310 @@
+{
+  "query": "SELECT id, name, creatorId FROM group_sessions WHERE name LIKE '%Test Challenge%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4S4NaSTm8gULMAn.ab4bddc10a61 --database fsRnWghWhaoD2r3KXXoRti --execute SELECT id, name, creatorId FROM group_sessions WHERE name LIKE '%Test Challenge%';",
+  "rows": [
+    {
+      "id": "1",
+      "name": "30-Day Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "2",
+      "name": "Join Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "3",
+      "name": "Details Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "4",
+      "name": "Leave Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "5",
+      "name": "30-Day Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "6",
+      "name": "Join Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "7",
+      "name": "Details Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "8",
+      "name": "Leave Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "9",
+      "name": "30-Day Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "10",
+      "name": "Join Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "11",
+      "name": "Details Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "12",
+      "name": "Leave Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "30001",
+      "name": "30-Day Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "30002",
+      "name": "Join Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "30003",
+      "name": "Details Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "30004",
+      "name": "Leave Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "60001",
+      "name": "30-Day Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "60002",
+      "name": "Join Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "60003",
+      "name": "Details Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "60004",
+      "name": "Leave Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "60005",
+      "name": "30-Day Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "60006",
+      "name": "Join Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "60007",
+      "name": "Details Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "60008",
+      "name": "Leave Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "60009",
+      "name": "30-Day Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "60010",
+      "name": "Join Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "60011",
+      "name": "Details Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "60012",
+      "name": "Leave Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90001",
+      "name": "30-Day Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90002",
+      "name": "Join Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90003",
+      "name": "Details Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90004",
+      "name": "Leave Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90005",
+      "name": "30-Day Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90006",
+      "name": "Join Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90007",
+      "name": "Details Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90008",
+      "name": "Leave Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90009",
+      "name": "30-Day Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90010",
+      "name": "Join Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90011",
+      "name": "Details Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90012",
+      "name": "Leave Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90013",
+      "name": "30-Day Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90014",
+      "name": "Join Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90015",
+      "name": "Details Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90016",
+      "name": "Leave Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90017",
+      "name": "30-Day Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90018",
+      "name": "Join Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90019",
+      "name": "Details Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90020",
+      "name": "Leave Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90021",
+      "name": "30-Day Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90022",
+      "name": "Join Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90023",
+      "name": "Details Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90024",
+      "name": "Leave Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90025",
+      "name": "30-Day Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90026",
+      "name": "Join Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90027",
+      "name": "Details Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90028",
+      "name": "Leave Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90029",
+      "name": "30-Day Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90030",
+      "name": "Join Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90031",
+      "name": "Details Test Challenge",
+      "creatorId": "1"
+    },
+    {
+      "id": "90032",
+      "name": "Leave Test Challenge",
+      "creatorId": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tcreatorId\n1\t30-Day Test Challenge\t1\n2\tJoin Test Challenge\t1\n3\tDetails Test Challenge\t1\n4\tLeave Test Challenge\t1\n5\t30-Day Test Challenge\t1\n6\tJoin Test Challenge\t1\n7\tDetails Test Challenge\t1\n8\tLeave Test Challenge\t1\n9\t30-Day Test Challenge\t1\n10\tJoin Test Challenge\t1\n11\tDetails Test Challenge\t1\n12\tLeave Test Challenge\t1\n30001\t30-Day Test Challenge\t1\n30002\tJoin Test Challenge\t1\n30003\tDetails Test Challenge\t1\n30004\tLeave Test Challenge\t1\n60001\t30-Day Test Challenge\t1\n60002\tJoin Test Challenge\t1\n60003\tDetails Test Challenge\t1\n60004\tLeave Test Challenge\t1\n60005\t30-Day Test Challenge\t1\n60006\tJoin Test Challenge\t1\n60007\tDetails Test Challenge\t1\n60008\tLeave Test Challenge\t1\n60009\t30-Day Test Challenge\t1\n60010\tJoin Test Challenge\t1\n60011\tDetails Test Challenge\t1\n60012\tLeave Test Challenge\t1\n90001\t30-Day Test Challenge\t1\n90002\tJoin Test Challenge\t1\n90003\tDetails Test Challenge\t1\n90004\tLeave Test Challenge\t1\n90005\t30-Day Test Challenge\t1\n90006\tJoin Test Challenge\t1\n90007\tDetails Test Challenge\t1\n90008\tLeave Test Challenge\t1\n90009\t30-Day Test Challenge\t1\n90010\tJoin Test Challenge\t1\n90011\tDetails Test Challenge\t1\n90012\tLeave Test Challenge\t1\n90013\t30-Day Test Challenge\t1\n90014\tJoin Test Challenge\t1\n90015\tDetails Test Challenge\t1\n90016\tLeave Test Challenge\t1\n90017\t30-Day Test Challenge\t1\n90018\tJoin Test Challenge\t1\n90019\tDetails Test Challenge\t1\n90020\tLeave Test Challenge\t1\n90021\t30-Day Test Challenge\t1\n90022\tJoin Test Challenge\t1\n90023\tDetails Test Challenge\t1\n90024\tLeave Test Challenge\t1\n90025\t30-Day Test Challenge\t1\n90026\tJoin Test Challenge\t1\n90027\tDetails Test Challenge\t1\n90028\tLeave Test Challenge\t1\n90029\t30-Day Test Challenge\t1\n90030\tJoin Test Challenge\t1\n90031\tDetails Test Challenge\t1\n90032\tLeave Test Challenge\t1\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

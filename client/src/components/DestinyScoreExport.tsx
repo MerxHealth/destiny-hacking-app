@@ -38,15 +38,15 @@ function drawRadarChart(
   const radius = Math.min(width, height) / 2 - 80;
   const numAxes = axes.length;
 
-  // Clear
-  ctx.fillStyle = "#0A0A0A";
+  // White background for print-friendly PDF
+  ctx.fillStyle = "#FFFFFF";
   ctx.fillRect(0, 0, width, height);
 
   // Draw concentric rings
   const rings = [0.2, 0.4, 0.6, 0.8, 1.0];
   for (const ring of rings) {
     ctx.beginPath();
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+    ctx.strokeStyle = "#CCCCCC";
     ctx.lineWidth = 1;
     for (let i = 0; i <= numAxes; i++) {
       const angle = (Math.PI * 2 * i) / numAxes - Math.PI / 2;
@@ -60,7 +60,7 @@ function drawRadarChart(
 
     // Ring label
     if (ring < 1.0) {
-      ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+      ctx.fillStyle = "#999999";
       ctx.font = "10px sans-serif";
       ctx.fillText(`${Math.round(ring * 100)}`, centerX + 4, centerY - radius * ring - 2);
     }
@@ -75,7 +75,7 @@ function drawRadarChart(
       centerX + Math.cos(angle) * radius,
       centerY + Math.sin(angle) * radius
     );
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
+    ctx.strokeStyle = "#DDDDDD";
     ctx.lineWidth = 1;
     ctx.stroke();
   }
@@ -91,7 +91,7 @@ function drawRadarChart(
     else ctx.lineTo(x, y);
   }
   ctx.closePath();
-  ctx.fillStyle = "rgba(1, 217, 141, 0.15)";
+  ctx.fillStyle = "rgba(1, 217, 141, 0.2)";
   ctx.fill();
   ctx.strokeStyle = "#01D98D";
   ctx.lineWidth = 2;
@@ -107,7 +107,7 @@ function drawRadarChart(
     ctx.arc(x, y, 4, 0, Math.PI * 2);
     ctx.fillStyle = "#01D98D";
     ctx.fill();
-    ctx.strokeStyle = "#0A0A0A";
+    ctx.strokeStyle = "#FFFFFF";
     ctx.lineWidth = 2;
     ctx.stroke();
   }
@@ -126,7 +126,7 @@ function drawRadarChart(
       ? axes[i].axisName!.replace("The ", "").replace(" Axis", "")
       : `Axis ${i}`;
 
-    ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+    ctx.fillStyle = "#333333";
     ctx.fillText(shortName, x, y);
 
     // Value below name
@@ -142,7 +142,7 @@ function drawRadarChart(
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(`${destinyScore}%`, centerX, centerY - 8);
-  ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+  ctx.fillStyle = "#666666";
   ctx.font = "12px sans-serif";
   ctx.fillText("DESTINY SCORE", centerX, centerY + 16);
 }
@@ -213,17 +213,17 @@ export function DestinyScoreExport() {
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
 
-      // Dark background
-      pdf.setFillColor(10, 10, 10);
+      // White background
+      pdf.setFillColor(255, 255, 255);
       pdf.rect(0, 0, pageWidth, pageHeight, "F");
 
-      // Header
-      pdf.setTextColor(1, 217, 141);
+      // Header — darker green for readability on white
+      pdf.setTextColor(1, 140, 90);
       pdf.setFontSize(28);
       pdf.setFont("helvetica", "bold");
       pdf.text("DESTINY HACKING", pageWidth / 2, 25, { align: "center" });
 
-      pdf.setTextColor(255, 255, 255);
+      pdf.setTextColor(30, 30, 30);
       pdf.setFontSize(10);
       pdf.setFont("helvetica", "normal");
       pdf.text(
@@ -233,12 +233,12 @@ export function DestinyScoreExport() {
       );
 
       // Divider
-      pdf.setDrawColor(1, 217, 141);
+      pdf.setDrawColor(1, 140, 90);
       pdf.setLineWidth(0.5);
       pdf.line(pageWidth / 2 - 30, 37, pageWidth / 2 + 30, 37);
 
       // User info and date
-      pdf.setTextColor(180, 180, 180);
+      pdf.setTextColor(100, 100, 100);
       pdf.setFontSize(9);
       const userName = user?.name || (language === "pt" ? "Capitão" : "Captain");
       const dateStr = new Date().toLocaleDateString(language === "pt" ? "pt-PT" : "en-GB", {
@@ -249,12 +249,12 @@ export function DestinyScoreExport() {
       pdf.text(`${userName}  •  ${dateStr}`, pageWidth / 2, 43, { align: "center" });
 
       // Destiny Score large
-      pdf.setTextColor(1, 217, 141);
+      pdf.setTextColor(1, 180, 110);
       pdf.setFontSize(48);
       pdf.setFont("helvetica", "bold");
       pdf.text(`${destinyScore}%`, pageWidth / 2, 60, { align: "center" });
 
-      pdf.setTextColor(255, 255, 255);
+      pdf.setTextColor(30, 30, 30);
       pdf.setFontSize(8);
       pdf.setFont("helvetica", "normal");
       const streakLabel = language === "pt" ? `Sequência: ${streak} dias` : `Streak: ${streak} days`;
@@ -276,21 +276,21 @@ export function DestinyScoreExport() {
       const tableY = 185;
       pdf.setFontSize(10);
       pdf.setFont("helvetica", "bold");
-      pdf.setTextColor(1, 217, 141);
+      pdf.setTextColor(1, 140, 90);
       pdf.text(language === "pt" ? "OS 15 EIXOS DA VONTADE LIVRE" : "THE 15 AXES OF FREE WILL", pageWidth / 2, tableY, { align: "center" });
 
       // Table headers
       const colX = [15, 55, 115, 155];
       const headerY = tableY + 8;
       pdf.setFontSize(7);
-      pdf.setTextColor(180, 180, 180);
+      pdf.setTextColor(100, 100, 100);
       pdf.text("#", colX[0], headerY);
       pdf.text(language === "pt" ? "EIXO" : "AXIS", colX[1], headerY);
       pdf.text(language === "pt" ? "ESPECTRO" : "SPECTRUM", colX[2], headerY);
       pdf.text(language === "pt" ? "VALOR" : "VALUE", colX[3], headerY);
 
       // Divider under headers
-      pdf.setDrawColor(40, 40, 40);
+      pdf.setDrawColor(200, 200, 200);
       pdf.setLineWidth(0.3);
       pdf.line(colX[0], headerY + 2, pageWidth - 15, headerY + 2);
 
@@ -302,22 +302,22 @@ export function DestinyScoreExport() {
         const value = axis.value;
 
         // Row number
-        pdf.setTextColor(100, 100, 100);
+        pdf.setTextColor(150, 150, 150);
         pdf.text(`${i}`, colX[0], rowY);
 
         // Axis name
-        pdf.setTextColor(220, 220, 220);
+        pdf.setTextColor(30, 30, 30);
         const name = axis.axisName || `Axis ${i}`;
         pdf.text(name.length > 22 ? name.substring(0, 22) + "…" : name, colX[1], rowY);
 
         // Spectrum
-        pdf.setTextColor(150, 150, 150);
+        pdf.setTextColor(80, 80, 80);
         const spectrum = `${axis.leftLabel} ↔ ${axis.rightLabel}`;
         pdf.text(spectrum.length > 25 ? spectrum.substring(0, 25) + "…" : spectrum, colX[2], rowY);
 
         // Value with color coding
-        if (value >= 70) pdf.setTextColor(1, 217, 141);
-        else if (value >= 40) pdf.setTextColor(255, 215, 0);
+        if (value >= 70) pdf.setTextColor(1, 140, 90);
+        else if (value >= 40) pdf.setTextColor(180, 150, 0);
         else pdf.setTextColor(200, 50, 50);
         pdf.setFont("helvetica", "bold");
         pdf.text(`${value}`, colX[3], rowY);
@@ -327,7 +327,7 @@ export function DestinyScoreExport() {
         const barX = colX[3] + 12;
         const barWidth = 30;
         const barHeight = 2;
-        pdf.setFillColor(30, 30, 30);
+        pdf.setFillColor(240, 240, 240);
         pdf.rect(barX, rowY - 2, barWidth, barHeight, "F");
         if (value >= 70) pdf.setFillColor(1, 217, 141);
         else if (value >= 40) pdf.setFillColor(255, 215, 0);
@@ -336,7 +336,7 @@ export function DestinyScoreExport() {
       });
 
       // Footer
-      pdf.setTextColor(80, 80, 80);
+      pdf.setTextColor(120, 120, 120);
       pdf.setFontSize(7);
       pdf.setFont("helvetica", "italic");
       pdf.text(
@@ -348,7 +348,7 @@ export function DestinyScoreExport() {
         { align: "center" }
       );
 
-      pdf.setTextColor(50, 50, 50);
+      pdf.setTextColor(150, 150, 150);
       pdf.setFont("helvetica", "normal");
       pdf.text("Destiny Hacking • destinyhack.manus.space", pageWidth / 2, pageHeight - 7, { align: "center" });
 

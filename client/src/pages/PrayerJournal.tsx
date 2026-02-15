@@ -6,7 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Lightbulb, Zap, Target } from "lucide-react";
+import { Heart, Lightbulb, Zap, Target, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/PageHeader";
 
 /**
@@ -29,6 +30,14 @@ export default function PrayerJournal() {
   const { data: todaysPrayer } = trpc.prayer.getToday.useQuery();
   const { data: entries, isLoading } = trpc.prayer.list.useQuery({ limit: 20 });
   const utils = trpc.useUtils();
+
+  const deleteMutation = trpc.prayer.delete.useMutation({
+    onSuccess: () => {
+      utils.prayer.list.invalidate();
+      utils.prayer.getToday.invalidate();
+      toast.success("Prayer entry deleted");
+    },
+  });
 
   const createEntry = trpc.prayer.create.useMutation({
     onSuccess: () => {
@@ -209,6 +218,16 @@ export default function PrayerJournal() {
                       day: 'numeric' 
                     })}
                   </h3>
+                  <button
+                    onClick={() => {
+                      if (confirm("Delete this prayer entry?")) {
+                        deleteMutation.mutate({ id: entry.id });
+                      }
+                    }}
+                    className="text-muted-foreground/40 hover:text-red-500 transition-colors p-1"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
                 <PrayerContent prayer={entry} />
               </Card>

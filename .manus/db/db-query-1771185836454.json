@@ -1,0 +1,106 @@
+{
+  "query": "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE();",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4S4NaSTm8gULMAn.ab4bddc10a61 --database fsRnWghWhaoD2r3KXXoRti --execute SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE();",
+  "rows": [
+    {
+      "TABLE_NAME": "__drizzle_migrations"
+    },
+    {
+      "TABLE_NAME": "users"
+    },
+    {
+      "TABLE_NAME": "connections"
+    },
+    {
+      "TABLE_NAME": "daily_cycles"
+    },
+    {
+      "TABLE_NAME": "emotional_axes"
+    },
+    {
+      "TABLE_NAME": "group_participants"
+    },
+    {
+      "TABLE_NAME": "group_sessions"
+    },
+    {
+      "TABLE_NAME": "insights"
+    },
+    {
+      "TABLE_NAME": "slider_states"
+    },
+    {
+      "TABLE_NAME": "accountability_partnerships"
+    },
+    {
+      "TABLE_NAME": "bias_checks"
+    },
+    {
+      "TABLE_NAME": "book_modules"
+    },
+    {
+      "TABLE_NAME": "module_progress"
+    },
+    {
+      "TABLE_NAME": "prayer_journal"
+    },
+    {
+      "TABLE_NAME": "slider_alignment_sessions"
+    },
+    {
+      "TABLE_NAME": "slider_profiles"
+    },
+    {
+      "TABLE_NAME": "sowing_reaping_entries"
+    },
+    {
+      "TABLE_NAME": "weekly_reviews"
+    },
+    {
+      "TABLE_NAME": "achievements"
+    },
+    {
+      "TABLE_NAME": "audiobook_progress"
+    },
+    {
+      "TABLE_NAME": "book_chapters"
+    },
+    {
+      "TABLE_NAME": "bookmarks"
+    },
+    {
+      "TABLE_NAME": "pdf_reading_progress"
+    },
+    {
+      "TABLE_NAME": "voice_models"
+    },
+    {
+      "TABLE_NAME": "pdf_annotations"
+    },
+    {
+      "TABLE_NAME": "pdf_highlights"
+    },
+    {
+      "TABLE_NAME": "flashcard_reviews"
+    },
+    {
+      "TABLE_NAME": "flashcards"
+    },
+    {
+      "TABLE_NAME": "highlight_comments"
+    },
+    {
+      "TABLE_NAME": "highlight_reactions"
+    },
+    {
+      "TABLE_NAME": "shared_highlights"
+    },
+    {
+      "TABLE_NAME": "chapter_feedback"
+    }
+  ],
+  "messages": [],
+  "stdout": "TABLE_NAME\n__drizzle_migrations\nusers\nconnections\ndaily_cycles\nemotional_axes\ngroup_participants\ngroup_sessions\ninsights\nslider_states\naccountability_partnerships\nbias_checks\nbook_modules\nmodule_progress\nprayer_journal\nslider_alignment_sessions\nslider_profiles\nsowing_reaping_entries\nweekly_reviews\nachievements\naudiobook_progress\nbook_chapters\nbookmarks\npdf_reading_progress\nvoice_models\npdf_annotations\npdf_highlights\nflashcard_reviews\nflashcards\nhighlight_comments\nhighlight_reactions\nshared_highlights\nchapter_feedback\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

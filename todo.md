@@ -1349,3 +1349,15 @@
 - [x] DoctrineCard made more compact for zero-scroll Bridge
 - [x] Write 26 vitest tests for Phase 68 features (phase68-bridge-v2.test.ts)
 - [x] Save checkpoint
+
+## Phase 69: Bug Fixes (7 Bugs)
+- [x] BUG 1: Fix "Invalid Date" on Emotional Trends chart X-axis (state.timestamp → state.clientTimestamp)
+- [x] BUG 2: Fix axis switching in Emotional Trends chart (add selectedAxisId state, wire onClick)
+- [x] BUG 3: Fix PDF Export dark background → white background with dark text
+- [x] BUG 4: Add Prayer Journal delete button (backend + frontend)
+- [x] BUG 5: Fix Inner Circle accept connection error (wrap reverse connection in try-catch)
+- [x] BUG 6: Add Flashcards browse/list view + delete button (backend + frontend)
+- [x] BUG 7: Add Challenges delete button + clean up test data
+- [x] Database cleanup: remove test prayer entries, test challenges, invalid connections
+- [x] Write 13 vitest tests for all bug fixes (phase69-bugfixes.test.ts)
+- [x] Save checkpoint
