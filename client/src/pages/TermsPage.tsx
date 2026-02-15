@@ -171,7 +171,8 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>Merx Digital Solutions Ltd</strong><br />
-            Email: support@destinyhacking.app
+             128 City Road, London, United Kingdom, EC1V 2NX<br />
+             Email: support@destinyhacking.app
           </p>
         </div>
       </div>

@@ -1384,3 +1384,8 @@
 - [x] Settings page updates (Legal section with T&C/Privacy links, Delete Account section)
 - [x] Write 43 vitest tests for all new features (phase71-launch-prep.test.ts)
 - [x] Save checkpoint
+
+## Phase 72: Update Registered Address
+- [x] Replace [Your registered address] with "128 City Road, London, United Kingdom, EC1V 2NX" in TermsPage.tsx
+- [x] Replace [Your registered address] with "128 City Road, London, United Kingdom, EC1V 2NX" in PrivacyPage.tsx
+- [x] Save checkpoint
