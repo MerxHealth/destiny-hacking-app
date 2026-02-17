@@ -1479,3 +1479,30 @@
 - [x] All routes tested and verified in browser
 - [x] Run vitest tests (all 72 tests pass in mobile-app + phase71, updated tests for new routing)
 - [x] Save checkpoint
+
+## Phase 82: Admin Panel
+
+### Schema & Backend
+- [x] Add subscriptions table (userId, plan, status, startDate, endDate, provider, transactionId)
+- [x] Add admin tRPC router with user management procedures (list, search, update role, ban/unban)
+- [x] Add admin subscription procedures (list, update, grant/revoke premium)
+- [x] Add admin analytics procedures (user stats, daily signups, active users, calibration stats)
+- [x] Add admin feedback procedures (list all feedback with user info, mark as reviewed)
+- [x] Add admin system procedures (audiobook generation links, voice model management)
+- [x] Run db:push for new schema (created tables via SQL)
+
+### Admin Panel UI
+- [x] Create AdminLayout with sidebar navigation (separate from app)
+- [x] Admin Dashboard: key metrics (total users, active today, new this week, total calibrations)
+- [x] Admin Dashboard: charts (signups over time, daily active users)
+- [x] User Management: searchable/filterable table, view user details, change role, ban/unban
+- [x] Subscription Management: list subscriptions, grant/revoke premium, view history
+- [x] Feedback Dashboard: list all user feedback, filter by status, mark reviewed
+- [x] Audiobook Tools: links to voice-cloning, audiobook-generation, batch-generation
+- [x] Activity Log: chronological list of all admin actions
+- [x] Admin link in More page (visible only to admin users)
+- [x] Admin routes at /app/admin/* with role-based access guard
+
+### Testing & Delivery
+- [x] Write vitest tests for admin procedures (40 tests, all passing)
+- [x] Save checkpoint

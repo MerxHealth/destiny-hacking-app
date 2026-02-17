@@ -1,2 +1,0 @@
-ALTER TABLE `voice_models` MODIFY COLUMN `status` enum('pending','ready','failed') NOT NULL DEFAULT 'ready';--> statement-breakpoint
-ALTER TABLE `voice_models` ADD `provider` varchar(50) DEFAULT 'chatterbox' NOT NULL;

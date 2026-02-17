@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
-import { eq, and, desc, asc, sql, gte, or, lte } from "drizzle-orm";
+import { eq, and, desc, asc, sql, gte, or, lte, like, count, between, isNull, ne } from "drizzle-orm";
 import { ENV } from "./_core/env";
 
 // Create database connection
@@ -26,6 +26,13 @@ import {
   flashcardReviews,
   voiceModels,
   chapterFeedback,
+  subscriptions,
+  adminActivityLog,
+  users,
+  type Subscription,
+  type InsertSubscription,
+  type AdminActivityLog,
+  type InsertAdminActivityLog,
   type EmotionalAxis,
   type InsertEmotionalAxis,
   type SliderState,
@@ -521,7 +528,8 @@ export async function getCyclesInDateRange(
 // USER MANAGEMENT (for auth system)
 // ============================================================================
 
-import { users, type User, type InsertUser } from "../drizzle/schema";
+// users already imported at top
+import { type User, type InsertUser } from "../drizzle/schema";
 
 /**
  * Get user by openId
@@ -2311,4 +2319,322 @@ export async function cleanupTestChapters() {
       )
     );
   return result;
+}
+
+// ============================================================================
+// ADMIN: USER MANAGEMENT
+// ============================================================================
+
+export async function adminGetUsers(opts: {
+  page: number;
+  limit: number;
+  search?: string;
+  role?: "user" | "admin";
+  sortBy?: "createdAt" | "lastSignedIn" | "name";
+  sortOrder?: "asc" | "desc";
+}) {
+  const { page, limit, search, role, sortBy = "createdAt", sortOrder = "desc" } = opts;
+  const offset = (page - 1) * limit;
+
+  const conditions = [];
+  if (search) {
+    conditions.push(
+      or(
+        like(users.name, `%${search}%`),
+        like(users.email, `%${search}%`),
+        like(users.openId, `%${search}%`)
+      )!
+    );
+  }
+  if (role) {
+    conditions.push(eq(users.role, role));
+  }
+
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const sortColumn = sortBy === "name" ? users.name : sortBy === "lastSignedIn" ? users.lastSignedIn : users.createdAt;
+  const orderFn = sortOrder === "asc" ? asc : desc;
+
+  const [userRows, countResult] = await Promise.all([
+    db.select().from(users).where(whereClause).orderBy(orderFn(sortColumn)).limit(limit).offset(offset),
+    db.select({ total: count() }).from(users).where(whereClause),
+  ]);
+
+  return {
+    users: userRows,
+    total: countResult[0]?.total ?? 0,
+    page,
+    limit,
+    totalPages: Math.ceil((countResult[0]?.total ?? 0) / limit),
+  };
+}
+
+export async function adminGetUserById(userId: number) {
+  const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  if (!user) return null;
+
+  // Get subscription
+  const [sub] = await db.select().from(subscriptions).where(eq(subscriptions.userId, userId)).orderBy(desc(subscriptions.createdAt)).limit(1);
+
+  // Get stats
+  const [calibrationCount] = await db.select({ total: count() }).from(sliderStates).where(eq(sliderStates.userId, userId));
+  const [cycleCount] = await db.select({ total: count() }).from(dailyCycles).where(eq(dailyCycles.userId, userId));
+  const [insightCount] = await db.select({ total: count() }).from(insights).where(eq(insights.userId, userId));
+
+  return {
+    ...user,
+    subscription: sub || null,
+    stats: {
+      calibrations: calibrationCount?.total ?? 0,
+      dailyCycles: cycleCount?.total ?? 0,
+      insights: insightCount?.total ?? 0,
+    },
+  };
+}
+
+export async function adminUpdateUserRole(userId: number, role: "user" | "admin") {
+  await db.update(users).set({ role }).where(eq(users.id, userId));
+}
+
+// ============================================================================
+// ADMIN: SUBSCRIPTIONS
+// ============================================================================
+
+export async function adminGetSubscriptions(opts: {
+  page: number;
+  limit: number;
+  status?: "active" | "expired" | "cancelled" | "paused" | "trial";
+  plan?: "free" | "monthly" | "yearly" | "lifetime";
+}) {
+  const { page, limit, status, plan } = opts;
+  const offset = (page - 1) * limit;
+
+  const conditions = [];
+  if (status) conditions.push(eq(subscriptions.status, status));
+  if (plan) conditions.push(eq(subscriptions.plan, plan));
+
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [rows, countResult] = await Promise.all([
+    db.select({
+      subscription: subscriptions,
+      userName: users.name,
+      userEmail: users.email,
+    })
+      .from(subscriptions)
+      .leftJoin(users, eq(subscriptions.userId, users.id))
+      .where(whereClause)
+      .orderBy(desc(subscriptions.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db.select({ total: count() }).from(subscriptions).where(whereClause),
+  ]);
+
+  return {
+    subscriptions: rows,
+    total: countResult[0]?.total ?? 0,
+    page,
+    limit,
+    totalPages: Math.ceil((countResult[0]?.total ?? 0) / limit),
+  };
+}
+
+export async function adminGrantSubscription(opts: {
+  userId: number;
+  plan: "monthly" | "yearly" | "lifetime";
+  adminId: number;
+  notes?: string;
+  endDate?: Date;
+}) {
+  const { userId, plan, adminId, notes, endDate } = opts;
+
+  // Expire any existing active subscription
+  await db.update(subscriptions)
+    .set({ status: "expired" })
+    .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, "active")));
+
+  // Create new subscription
+  const [result] = await db.insert(subscriptions).values({
+    userId,
+    plan,
+    status: "active",
+    provider: "manual",
+    grantedBy: adminId,
+    adminNotes: notes || `Granted by admin #${adminId}`,
+    startDate: new Date(),
+    endDate: endDate || (plan === "lifetime" ? null : new Date(Date.now() + (plan === "yearly" ? 365 : 30) * 24 * 60 * 60 * 1000)),
+  });
+
+  return result;
+}
+
+export async function adminRevokeSubscription(subscriptionId: number) {
+  await db.update(subscriptions)
+    .set({ status: "cancelled", cancelledAt: new Date() })
+    .where(eq(subscriptions.id, subscriptionId));
+}
+
+export async function adminGetUserSubscription(userId: number) {
+  const [sub] = await db.select()
+    .from(subscriptions)
+    .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, "active")))
+    .orderBy(desc(subscriptions.createdAt))
+    .limit(1);
+  return sub || null;
+}
+
+// ============================================================================
+// ADMIN: ANALYTICS / DASHBOARD STATS
+// ============================================================================
+
+export async function adminGetDashboardStats() {
+  const now = new Date();
+  const today = now.toISOString().split("T")[0];
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+  const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
+  const [totalUsers] = await db.select({ total: count() }).from(users);
+  const [newUsersWeek] = await db.select({ total: count() }).from(users).where(gte(users.createdAt, new Date(weekAgo)));
+  const [newUsersMonth] = await db.select({ total: count() }).from(users).where(gte(users.createdAt, new Date(monthAgo)));
+  const [activeToday] = await db.select({ total: count() }).from(users).where(gte(users.lastSignedIn, new Date(today)));
+  const [totalCalibrations] = await db.select({ total: count() }).from(sliderStates);
+  const [totalCycles] = await db.select({ total: count() }).from(dailyCycles);
+  const [completedCycles] = await db.select({ total: count() }).from(dailyCycles).where(eq(dailyCycles.isComplete, true));
+  const [totalFeedback] = await db.select({ total: count() }).from(chapterFeedback);
+  const [pendingFeedback] = await db.select({ total: count() }).from(chapterFeedback).where(eq(chapterFeedback.status, "pending"));
+  const [activeSubscriptions] = await db.select({ total: count() }).from(subscriptions).where(eq(subscriptions.status, "active"));
+
+  return {
+    totalUsers: totalUsers?.total ?? 0,
+    newUsersWeek: newUsersWeek?.total ?? 0,
+    newUsersMonth: newUsersMonth?.total ?? 0,
+    activeToday: activeToday?.total ?? 0,
+    totalCalibrations: totalCalibrations?.total ?? 0,
+    totalCycles: totalCycles?.total ?? 0,
+    completedCycles: completedCycles?.total ?? 0,
+    cycleCompletionRate: totalCycles?.total ? Math.round(((completedCycles?.total ?? 0) / totalCycles.total) * 100) : 0,
+    totalFeedback: totalFeedback?.total ?? 0,
+    pendingFeedback: pendingFeedback?.total ?? 0,
+    activeSubscriptions: activeSubscriptions?.total ?? 0,
+  };
+}
+
+export async function adminGetSignupChart(days: number = 30) {
+  const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const rows = await db
+    .select({
+      date: sql<string>`DATE(${users.createdAt})`.as("date"),
+      count: count(),
+    })
+    .from(users)
+    .where(gte(users.createdAt, startDate))
+    .groupBy(sql`DATE(${users.createdAt})`)
+    .orderBy(asc(sql`DATE(${users.createdAt})`));
+  return rows;
+}
+
+export async function adminGetActiveUsersChart(days: number = 30) {
+  const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const rows = await db
+    .select({
+      date: sql<string>`DATE(${users.lastSignedIn})`.as("date"),
+      count: count(),
+    })
+    .from(users)
+    .where(gte(users.lastSignedIn, startDate))
+    .groupBy(sql`DATE(${users.lastSignedIn})`)
+    .orderBy(asc(sql`DATE(${users.lastSignedIn})`));
+  return rows;
+}
+
+// ============================================================================
+// ADMIN: FEEDBACK MANAGEMENT
+// ============================================================================
+
+export async function adminGetAllFeedback(opts: {
+  page: number;
+  limit: number;
+  status?: "pending" | "reviewed" | "resolved";
+}) {
+  const { page, limit, status } = opts;
+  const offset = (page - 1) * limit;
+
+  const conditions = [];
+  if (status) conditions.push(eq(chapterFeedback.status, status));
+
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [rows, countResult] = await Promise.all([
+    db.select({
+      feedback: chapterFeedback,
+      userName: users.name,
+      userEmail: users.email,
+    })
+      .from(chapterFeedback)
+      .leftJoin(users, eq(chapterFeedback.userId, users.id))
+      .where(whereClause)
+      .orderBy(desc(chapterFeedback.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db.select({ total: count() }).from(chapterFeedback).where(whereClause),
+  ]);
+
+  return {
+    feedback: rows,
+    total: countResult[0]?.total ?? 0,
+    page,
+    limit,
+    totalPages: Math.ceil((countResult[0]?.total ?? 0) / limit),
+  };
+}
+
+export async function adminUpdateFeedbackStatus(feedbackId: number, status: "pending" | "reviewed" | "resolved", adminNotes?: string) {
+  const updateData: Record<string, unknown> = { status };
+  if (adminNotes !== undefined) updateData.adminNotes = adminNotes;
+  if (status === "resolved") updateData.resolvedAt = new Date();
+  await db.update(chapterFeedback).set(updateData).where(eq(chapterFeedback.id, feedbackId));
+}
+
+// ============================================================================
+// ADMIN: ACTIVITY LOG
+// ============================================================================
+
+export async function adminLogActivity(opts: {
+  adminId: number;
+  action: string;
+  targetUserId?: number;
+  details?: Record<string, unknown>;
+}) {
+  await db.insert(adminActivityLog).values({
+    adminId: opts.adminId,
+    action: opts.action,
+    targetUserId: opts.targetUserId || null,
+    details: opts.details || null,
+  });
+}
+
+export async function adminGetActivityLog(opts: { page: number; limit: number }) {
+  const { page, limit } = opts;
+  const offset = (page - 1) * limit;
+
+  const [rows, countResult] = await Promise.all([
+    db.select({
+      log: adminActivityLog,
+      adminName: users.name,
+    })
+      .from(adminActivityLog)
+      .leftJoin(users, eq(adminActivityLog.adminId, users.id))
+      .orderBy(desc(adminActivityLog.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db.select({ total: count() }).from(adminActivityLog),
+  ]);
+
+  return {
+    logs: rows,
+    total: countResult[0]?.total ?? 0,
+    page,
+    limit,
+    totalPages: Math.ceil((countResult[0]?.total ?? 0) / limit),
+  };
 }

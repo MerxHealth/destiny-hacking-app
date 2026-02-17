@@ -44,6 +44,12 @@ import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { CookieConsent } from "./components/CookieConsent";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
+import AdminFeedback from "./pages/admin/AdminFeedback";
+import AdminAudiobookTools from "./pages/admin/AdminAudiobookTools";
+import AdminActivityLog from "./pages/admin/AdminActivityLog";
 
 /**
  * Public routes — accessible without authentication.
@@ -125,6 +131,12 @@ function AppRouter() {
           <Route path="/philosophy" component={Philosophy} />
           <Route path="/about" component={Philosophy} />
           <Route path="/monthly-report" component={MonthlyReportPage} />
+          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin/users" component={AdminUsers} />
+          <Route path="/admin/subscriptions" component={AdminSubscriptions} />
+          <Route path="/admin/feedback" component={AdminFeedback} />
+          <Route path="/admin/audiobook-tools" component={AdminAudiobookTools} />
+          <Route path="/admin/activity-log" component={AdminActivityLog} />
           <Route path="/auth" component={NewHome} />
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />

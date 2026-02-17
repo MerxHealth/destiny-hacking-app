@@ -1,2 +1,0 @@
-ALTER TABLE `voice_models` MODIFY COLUMN `status` enum('pending','training','ready','failed') NOT NULL DEFAULT 'ready';--> statement-breakpoint
-ALTER TABLE `voice_models` ADD `isPrimary` boolean DEFAULT false NOT NULL;

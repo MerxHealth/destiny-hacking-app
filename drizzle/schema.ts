@@ -1068,6 +1068,71 @@ export type HighlightComment = typeof highlightComments.$inferSelect;
 export type InsertHighlightComment = typeof highlightComments.$inferInsert;
 
 // ============================================================================
+// SUBSCRIPTIONS
+// ============================================================================
+
+/**
+ * Subscriptions track user premium access.
+ * Supports App Store, Google Play, and manual admin grants.
+ */
+export const subscriptions = mysqlTable("subscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  // Plan details
+  plan: mysqlEnum("plan", ["free", "monthly", "yearly", "lifetime"]).default("free").notNull(),
+  status: mysqlEnum("status", ["active", "expired", "cancelled", "paused", "trial"]).default("active").notNull(),
+  
+  // Provider info
+  provider: mysqlEnum("provider", ["manual", "apple", "google", "stripe"]).default("manual").notNull(),
+  transactionId: varchar("transactionId", { length: 255 }),
+  receiptData: text("receiptData"), // Store receipt for verification
+  
+  // Dates
+  startDate: timestamp("startDate").defaultNow().notNull(),
+  endDate: timestamp("endDate"), // null = lifetime
+  trialEndDate: timestamp("trialEndDate"),
+  cancelledAt: timestamp("cancelledAt"),
+  
+  // Admin notes
+  grantedBy: int("grantedBy"), // Admin user ID who granted manually
+  adminNotes: text("adminNotes"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("subscriptions_user_id_idx").on(table.userId),
+  statusIdx: index("subscriptions_status_idx").on(table.status),
+  providerIdx: index("subscriptions_provider_idx").on(table.provider),
+  endDateIdx: index("subscriptions_end_date_idx").on(table.endDate),
+}));
+
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = typeof subscriptions.$inferInsert;
+
+/**
+ * Admin Activity Log tracks all admin actions for audit trail.
+ */
+export const adminActivityLog = mysqlTable("admin_activity_log", {
+  id: int("id").autoincrement().primaryKey(),
+  adminId: int("adminId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  // Action details
+  action: varchar("action", { length: 100 }).notNull(), // e.g., "grant_premium", "ban_user", "update_role"
+  targetUserId: int("targetUserId"), // User affected by the action
+  details: json("details"), // Additional context
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  adminIdIdx: index("admin_activity_log_admin_id_idx").on(table.adminId),
+  actionIdx: index("admin_activity_log_action_idx").on(table.action),
+  createdAtIdx: index("admin_activity_log_created_at_idx").on(table.createdAt),
+}));
+
+export type AdminActivityLog = typeof adminActivityLog.$inferSelect;
+export type InsertAdminActivityLog = typeof adminActivityLog.$inferInsert;
+
+// ============================================================================
 // DRIZZLE RELATIONS (for easier querying)
 // ============================================================================
 

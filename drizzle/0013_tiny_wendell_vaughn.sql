@@ -1,1 +1,0 @@
-ALTER TABLE `book_chapters` ADD `audioUrlPt` text;

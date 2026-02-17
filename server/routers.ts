@@ -1,7 +1,7 @@
 import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { publicProcedure, protectedProcedure, adminProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
@@ -2128,6 +2128,155 @@ Provide a brief Stoic strategist reflection (2-3 sentences) on the cause-effect 
     getStats: protectedProcedure
       .query(async ({ ctx }) => {
         return db.getFlashcardStats(ctx.user.id);
+      }),
+  }),
+
+  // ============================================================================
+  // ADMIN PANEL
+  // ============================================================================
+  admin: router({
+    // Dashboard stats
+    getDashboardStats: adminProcedure.query(async () => {
+      return db.adminGetDashboardStats();
+    }),
+
+    // Signup chart data
+    getSignupChart: adminProcedure
+      .input(z.object({ days: z.number().min(7).max(365).default(30) }))
+      .query(async ({ input }) => {
+        return db.adminGetSignupChart(input.days);
+      }),
+
+    // Active users chart data
+    getActiveUsersChart: adminProcedure
+      .input(z.object({ days: z.number().min(7).max(365).default(30) }))
+      .query(async ({ input }) => {
+        return db.adminGetActiveUsersChart(input.days);
+      }),
+
+    // User management
+    getUsers: adminProcedure
+      .input(z.object({
+        page: z.number().min(1).default(1),
+        limit: z.number().min(1).max(100).default(20),
+        search: z.string().optional(),
+        role: z.enum(["user", "admin"]).optional(),
+        sortBy: z.enum(["createdAt", "lastSignedIn", "name"]).default("createdAt"),
+        sortOrder: z.enum(["asc", "desc"]).default("desc"),
+      }))
+      .query(async ({ input }) => {
+        return db.adminGetUsers(input);
+      }),
+
+    getUserById: adminProcedure
+      .input(z.object({ userId: z.number() }))
+      .query(async ({ input }) => {
+        const user = await db.adminGetUserById(input.userId);
+        if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+        return user;
+      }),
+
+    updateUserRole: adminProcedure
+      .input(z.object({ userId: z.number(), role: z.enum(["user", "admin"]) }))
+      .mutation(async ({ ctx, input }) => {
+        await db.adminUpdateUserRole(input.userId, input.role);
+        await db.adminLogActivity({
+          adminId: ctx.user.id,
+          action: "update_role",
+          targetUserId: input.userId,
+          details: { newRole: input.role },
+        });
+        return { success: true };
+      }),
+
+    // Subscription management
+    getSubscriptions: adminProcedure
+      .input(z.object({
+        page: z.number().min(1).default(1),
+        limit: z.number().min(1).max(100).default(20),
+        status: z.enum(["active", "expired", "cancelled", "paused", "trial"]).optional(),
+        plan: z.enum(["free", "monthly", "yearly", "lifetime"]).optional(),
+      }))
+      .query(async ({ input }) => {
+        return db.adminGetSubscriptions(input);
+      }),
+
+    grantSubscription: adminProcedure
+      .input(z.object({
+        userId: z.number(),
+        plan: z.enum(["monthly", "yearly", "lifetime"]),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await db.adminGrantSubscription({
+          userId: input.userId,
+          plan: input.plan,
+          adminId: ctx.user.id,
+          notes: input.notes,
+        });
+        await db.adminLogActivity({
+          adminId: ctx.user.id,
+          action: "grant_subscription",
+          targetUserId: input.userId,
+          details: { plan: input.plan, notes: input.notes },
+        });
+        return { success: true };
+      }),
+
+    revokeSubscription: adminProcedure
+      .input(z.object({ subscriptionId: z.number(), userId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.adminRevokeSubscription(input.subscriptionId);
+        await db.adminLogActivity({
+          adminId: ctx.user.id,
+          action: "revoke_subscription",
+          targetUserId: input.userId,
+          details: { subscriptionId: input.subscriptionId },
+        });
+        return { success: true };
+      }),
+
+    getUserSubscription: adminProcedure
+      .input(z.object({ userId: z.number() }))
+      .query(async ({ input }) => {
+        return db.adminGetUserSubscription(input.userId);
+      }),
+
+    // Feedback management
+    getAllFeedback: adminProcedure
+      .input(z.object({
+        page: z.number().min(1).default(1),
+        limit: z.number().min(1).max(100).default(20),
+        status: z.enum(["pending", "reviewed", "resolved"]).optional(),
+      }))
+      .query(async ({ input }) => {
+        return db.adminGetAllFeedback(input);
+      }),
+
+    updateFeedbackStatus: adminProcedure
+      .input(z.object({
+        feedbackId: z.number(),
+        status: z.enum(["pending", "reviewed", "resolved"]),
+        adminNotes: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await db.adminUpdateFeedbackStatus(input.feedbackId, input.status, input.adminNotes);
+        await db.adminLogActivity({
+          adminId: ctx.user.id,
+          action: "update_feedback",
+          details: { feedbackId: input.feedbackId, newStatus: input.status },
+        });
+        return { success: true };
+      }),
+
+    // Activity log
+    getActivityLog: adminProcedure
+      .input(z.object({
+        page: z.number().min(1).default(1),
+        limit: z.number().min(1).max(50).default(20),
+      }))
+      .query(async ({ input }) => {
+        return db.adminGetActivityLog(input);
       }),
   }),
 });
