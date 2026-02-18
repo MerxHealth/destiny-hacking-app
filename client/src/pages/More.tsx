@@ -255,25 +255,6 @@ export default function More() {
               )}
             </div>
 
-            {/* Admin Panel Link (admin only) */}
-            {user?.role === "admin" && (
-              <a
-                href="/admin"
-                className="flex items-center gap-3 px-4 py-3.5 hover:bg-accent/50 active:bg-accent transition-colors"
-              >
-                <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-                  <Shield className="w-5 h-5 text-emerald-500" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm">Admin Panel</div>
-                  <div className="text-xs text-muted-foreground truncate">
-                    {t({ en: "User management, subscriptions & analytics", pt: "Gestão de usuários, assinaturas e analytics", es: "Gestión de usuarios, suscripciones y analíticas" })}
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-              </a>
-            )}
-
             {/* Settings Link */}
             <Link
               href="/settings"

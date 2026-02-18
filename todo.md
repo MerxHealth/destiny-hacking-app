@@ -1551,3 +1551,8 @@
 
 - [x] Add visible logout button in Settings page (above Delete Account) with EN/PT/ES translations
 - [x] Save checkpoint
+
+## Phase 88: Remove Admin Link from More Page
+
+- [x] Remove Admin Panel link from More/Arsenal page (admin only accessible via /admin URL)
+- [x] Save checkpoint
